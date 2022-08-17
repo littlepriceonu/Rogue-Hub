@@ -14,6 +14,12 @@ if not req then
     return
 end
 
+if isfolder and makefolder and not isfolder("Rogue Hub") then
+    makefolder("Rogue Hub")
+    makefolder("Rogue Hub/Data")
+    makefolder("Rogue Hub/Configs")
+end
+
 local response = req({
     Url = "https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Games/" .. game.PlaceId .. ".lua",
     Method = "GET"
