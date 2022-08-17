@@ -14,10 +14,11 @@ if not req then
     return
 end
 
-if isfolder and makefolder and not isfolder("Rogue Hub") then
+if makefolder and isfolder and not isfolder("Rogue Hub") then
     makefolder("Rogue Hub")
-    makefolder("Rogue Hub/Data")
+    
     makefolder("Rogue Hub/Configs")
+    makefolder("Rogue Hub/Data")
 end
 
 local response = req({
