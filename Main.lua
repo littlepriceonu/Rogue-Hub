@@ -2,6 +2,14 @@ if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "Rogue Hub Annoucement",
+    Text = "The script currently doesn't work, please wait a few days while to attempt to fix this.",
+    Duration = 5
+})
+
+return
+
 local req = http_request or request or syn.request
 
 if not req then
