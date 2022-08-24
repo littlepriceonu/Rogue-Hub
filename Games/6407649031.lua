@@ -1,11 +1,11 @@
 -- anticheat bypass, ty WhoIsE (staff manager at the krnl discord server) for this
 
 if getconnections then
-    for _, connection in pairs(getconnections(game:GetService("ScriptContext").Error)) do
+    for _, connection in pairs(getconnections(game:GetService("LogService").MessageOut)) do
         connection:Disable()
     end
     
-    for _, connection in pairs(getconnections(game:GetService("ScriptContext").MessageOut)) do
+    for _, connection in pairs(getconnections(game:GetService("ScriptContext").Error)) do
         connection:Disable()
     end
 end
