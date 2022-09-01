@@ -400,7 +400,7 @@ partDrop:SetOption(getgenv().settings.aimbotPart)
 
 -- Gun Mods
 
-if getgc then
+if getgc and rawget then
     local gunMods = mainTab:CreateSection("Gun Mods")
 
     gunMods:CreateToggle("No Spread", false, function(bool)
