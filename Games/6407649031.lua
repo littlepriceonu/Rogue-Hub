@@ -258,6 +258,8 @@ visualSec:CreateToggle("Space Skybox", getgenv().settings.spaceSkybox or false, 
         space.SunAngularSize = 12
         space.MoonAngularSize = 1.5
     else
+        if game:GetService("Lighting"):FindFirstChild("SpaceHD") == nil then return end
+        
         game:GetService("Lighting"):FindFirstChild("SpaceHD"):Destroy()
     end
 end)
@@ -380,7 +382,7 @@ local aimSec = mainTab:CreateSection("Aiming")
 FOVCircle = Drawing.new("Circle")
 
 FOVCircle.Visible = false
-FOVCircle.Radius = getgenv().settings.fovRadius
+FOVCircle.Radius = getgenv().settings.fovRadius or 0
 FOVCircle.Color = Color3.fromRGB(getgenv().settings.fovColor or 255,255,255)
 FOVCircle.Thickness = 2
 FOVCircle.Filled = false
