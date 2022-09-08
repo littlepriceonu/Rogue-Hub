@@ -14,6 +14,18 @@ if getgenv().Rogue_AlreadyLoaded ~= nil then error("Rogue Hub was already found 
 
 if game.PlaceId ~= 6407649031 then return end
 
+local cambobFunc
+
+if getgc and hookfunction then
+    for _, v in ipairs(getgc()) do
+	    local exploitFunction = isexecutorclosure or is_synapse_function or is_exploit_function	
+		
+        if type(v) == "function" and not exploitFunction(v) and getinfo(v).name == "cambob" then
+            cambobFunc = v
+        end
+    end
+end
+
 local sound = Instance.new("Sound")
 sound.Parent = game:GetService("Workspace")
 sound.SoundId = "rbxassetid://1548304764"
@@ -95,7 +107,10 @@ getgenv().settings = {
     noSpread = false,
     walkSpeed = 20,
     rainbowFOV = false,
-    killSound = "Default"
+    killSound = "Default",
+    autoLock = false,
+    textSize = 15,
+    fovColor = Color3.fromRGB(255,255,255)
 }
 
 if makefolder and isfolder and not isfolder("Rogue Hub") then
@@ -125,28 +140,21 @@ local function getGun(player)
     end
 end
 
-local function esp(object, text, player, color)
+-- NO MIKEY ALLOWED THAT RETARDS A FUCKING SKID (also if you see this then cool you found the second easter egg)
+
+local function esp(object, text, color)
     local espText = Drawing.new("Text")
     espText.Visible = false
     espText.Center = true
     espText.Outline = true
     espText.Font = 3
     espText.Color = color
-    espText.Size = 15
     
     if getgenv().settings.playerESP == false and espText and connection then
         espText.Visible = false
         espText:Remove()
         connection:Disconnect()
     end
-
-    game:GetService("Players").PlayerRemoving:Connect(function(plr)
-        if plr == player and espText and connection then
-            espText.Visible = false
-            espText:Remove()
-            connection:Disconnect()
-        end
-    end)
     
     local connection
     connection = game:GetService("RunService").RenderStepped:Connect(function()
@@ -168,6 +176,7 @@ local function esp(object, text, player, color)
                 end
                 
                 espText.Visible = true
+                espText.Size = getgenv().settings.textSize
             else
                 if espText then
                     espText.Visible = false
@@ -189,26 +198,26 @@ local mainTab = window:CreateTab("Main")
 
 local playerSec = mainTab:CreateSection("Player")
 
-playerSec:CreateToggle("Infinite Jump", getgenv().settings.infJump, function(bool)
+playerSec:CreateToggle("Infinite Jump", getgenv().settings.infJump or false, function(bool)
     getgenv().settings.infJump = bool
     saveSettings()
 end)
 
-local bHop = playerSec:CreateToggle("Bunny-Hop", getgenv().settings.bunnyHop, function(bool)
+local bHop = playerSec:CreateToggle("Bunny-Hop", getgenv().settings.bunnyHop or false, function(bool)
     getgenv().settings.bunnyHop = bool
     saveSettings()
 end)
 
 bHop:AddToolTip("hippity hop!")
 
-local triggerTog = playerSec:CreateToggle("Trigger-Bot", getgenv().settings.triggerBot, function(bool)
+local triggerTog = playerSec:CreateToggle("Trigger-Bot", getgenv().settings.triggerBot or false, function(bool)
     getgenv().settings.triggerBot = bool
     saveSettings()
 end)
 
 triggerTog:AddToolTip("automatically shoots when you aim at a player")
 
-local toxicTog = playerSec:CreateToggle("Auto Toxic", getgenv().settings.toxicAuto, function(bool)
+local toxicTog = playerSec:CreateToggle("Auto Toxic", getgenv().settings.toxicAuto or false, function(bool)
     getgenv().settings.toxicAuto = bool
     saveSettings()
     
@@ -227,7 +236,7 @@ toxicTog:AddToolTip("automatically says a toxic phrase when you earn a kill")
 
 local visualSec = mainTab:CreateSection("Visuals")
 
-visualSec:CreateToggle("Space Skybox", getgenv().settings.spaceSkybox, function(bool)
+visualSec:CreateToggle("Space Skybox", getgenv().settings.spaceSkybox or false, function(bool)
     getgenv().settings.spaceSkybox = bool
     saveSettings()
     
@@ -270,6 +279,22 @@ end)
 
 fovButton:AddToolTip("Set's your camera's FOV to 120")
 
+if getgc and hookfunction then
+    local shakeButton = visualSec:CreateButton("No Camera Shake", function()
+        if not getgenv().cameraShakeDone then
+            hookfunction(cambobFunc, function() return end)
+    	else
+    	    game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Rogue Hub Error",
+                Text = "No Camera Shake is already applied!",
+                Duration = 5
+            })
+    	end
+    end)
+    
+    shakeButton:AddToolTip("Removes any camera shake (helps a lot when paired with Walk Speed.")
+end
+
 local soundKill = visualSec:CreateDropdown("Killsounds", {"Default","Bonk","Team Fortress 2","Rust","CSGO","Hitmarker"}, function(option)
     getgenv().settings.killSound = option
     saveSettings()
@@ -289,29 +314,29 @@ local soundKill = visualSec:CreateDropdown("Killsounds", {"Default","Bonk","Team
     end
 end)
 
-soundKill:SetOption(getgenv().settings.killSound)
+soundKill:SetOption(getgenv().settings.killSound or "Default")
 
 local soundButton = visualSec:CreateButton("Preview Killsound", function()
 	game:GetService("Workspace").Sounds.Kill:Play()
 end)
 
-soundButton:AddToolTip("Lets you play the killsound to see if its for you.")
+soundButton:AddToolTip("Lets you play the killsound to see if its good for you.")
 
 -- Player ESP
 
 local espSec = mainTab:CreateSection("Player ESP")
 
-espSec:CreateToggle("Enabled", getgenv().settings.playerESP, function(bool)
+espSec:CreateToggle("Enabled", getgenv().settings.playerESP or false, function(bool)
     getgenv().settings.playerESP = bool
     saveSettings()
     
     if getgenv().settings.playerESP and isLoaded then
         for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
             if player ~= localPlr and player.Character and getgenv().settings.playerESP then
-                esp(player.Character:WaitForChild("Head"), player.Name, player, Color3.fromRGB(255,255,255))
+                esp(player.Character:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
                 
                 player.CharacterAdded:Connect(function(playerChar)
-                    esp(playerChar:WaitForChild("Head"), player.Name, player, Color3.fromRGB(255,255,255))
+                    esp(playerChar:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
                 end)
             end
         end
@@ -320,71 +345,83 @@ end)
 
 game:GetService("Players").PlayerAdded:Connect(function(player)
 	if player ~= localPlr and player.Character and getgenv().settings.playerESP then
-	    esp(player.Character:WaitForChild("Head"), player.Name, player, Color3.fromRGB(255,255,255))
+	    esp(player.Character:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
 	elseif player ~= localPlr and getgenv().settings.playerESP then
         player.CharacterAdded:Connect(function(playerChar)
-            esp(playerChar:WaitForChild("Head"), player.Name, player, Color3.fromRGB(255,255,255))
+    	    esp(player.Character:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
         end)
     end
 end)
 
-espSec:CreateToggle("Show Player Weapon", getgenv().settings.espWeapon, function(bool)
+espSec:CreateToggle("Show Player Weapon", getgenv().settings.espWeapon or false, function(bool)
     getgenv().settings.espWeapon = bool
     saveSettings()
 end)
 
-espSec:CreateToggle("Show Player Distance", getgenv().settings.distanceESP, function(bool)
+espSec:CreateToggle("Show Player Distance", getgenv().settings.distanceESP or false, function(bool)
     getgenv().settings.distanceESP = bool
     saveSettings()
 end)
 
-local distanceSlider = espSec:CreateSlider("ESP Distance Limit", 0,1000,getgenv().settings.playerDistance,true, function(value)
+local distanceSlider = espSec:CreateSlider("ESP Distance Limit", 0,1000,getgenv().settings.playerDistance or 0,true, function(value)
     getgenv().settings.playerDistance = value
+    saveSettings()
+end)
+
+local textSizeSlider = espSec:CreateSlider("ESP Text Size", 15,100,getgenv().settings.textSize or 15,true, function(value)
+    getgenv().settings.textSize = value
     saveSettings()
 end)
 
 -- Aiming
 
 local aimSec = mainTab:CreateSection("Aiming")
-getgenv().fovColor = Color3.fromRGB(255,255,255)
 
 FOVCircle = Drawing.new("Circle")
 
 FOVCircle.Visible = false
 FOVCircle.Radius = getgenv().settings.fovRadius
-FOVCircle.Color = getgenv().fovColor
+FOVCircle.Color = Color3.fromRGB(getgenv().settings.fovColor or 255,255,255)
 FOVCircle.Thickness = 2
 FOVCircle.Filled = false
 FOVCircle.Transparency = 1
 
-local botTog = aimSec:CreateToggle("Aimbot", getgenv().settings.aimBotTog, function(bool)
+local botTog = aimSec:CreateToggle("Aimbot", getgenv().settings.aimBotTog or false, function(bool)
 	getgenv().settings.aimBotTog = bool
 	saveSettings()
 end)
 
-aimSec:CreateToggle("Show FOV", getgenv().settings.showFOV, function(bool)
+aimSec:CreateToggle("Show FOV", getgenv().settings.showFOV or false, function(bool)
     getgenv().settings.showFOV = bool
     FOVCircle.Visible = getgenv().settings.showFOV
     saveSettings()
 end)
 
-aimSec:CreateToggle("Rainbow FOV", getgenv().settings.rainbowFOV, function(bool)
+aimSec:CreateToggle("Rainbow FOV", getgenv().settings.rainbowFOV or false, function(bool)
     getgenv().settings.rainbowFOV = bool
     saveSettings()
 end)
 
-aimSec:CreateSlider("FOV Radius", 0,500,getgenv().settings.fovRadius,true, function(value)
+local lock = aimSec:CreateToggle("Auto Lock", getgenv().settings.autoLock or false, function(bool)
+    getgenv().settings.autoLock = bool
+    saveSettings()
+end)
+
+lock:AddToolTip("Disables the need to have to Right Click for the aimbot to activate.")
+
+aimSec:CreateSlider("FOV Radius", 0,500,getgenv().settings.fovRadius or 0,true, function(value)
 	getgenv().settings.fovRadius = value
     FOVCircle.Radius = getgenv().settings.fovRadius
     saveSettings()
 end)
 
 local colorFOV = aimSec:CreateColorpicker("FOV Color", function(color)
-	getgenv().fovColor = color
-	FOVCircle.Color = getgenv().fovColor
+	getgenv().settings.fovColor = color
+	FOVCircle.Color = getgenv().settings.fovColor
+	saveSettings()
 end)
 
-colorFOV:UpdateColor(getgenv().fovColor)
+colorFOV:UpdateColor(getgenv().settings.fovColor or Color3.fromRGB(255,255,255))
 
 local partDrop = aimSec:CreateDropdown("Aim Part", {"Head","Chest"}, function(option)
     if option == "Chest" then
@@ -396,11 +433,11 @@ local partDrop = aimSec:CreateDropdown("Aim Part", {"Head","Chest"}, function(op
     end
 end)
 
-partDrop:SetOption(getgenv().settings.aimbotPart)
+partDrop:SetOption(getgenv().settings.aimbotPart or "Head")
 
 -- Gun Mods
 
-if getgc and rawget then
+if getgc then
     local gunMods = mainTab:CreateSection("Gun Mods")
 
     gunMods:CreateToggle("No Spread", false, function(bool)
@@ -688,7 +725,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             task.wait(2)
         end
 
-        if getgenv().settings.aimBotTog and mouseDown then
+        if getgenv().settings.aimBotTog and mouseDown or getgenv().settings.aimBotTog and getgenv().settings.autoLock then
             for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
                 if player ~= localPlr and player.Character and player.Status ~= "Dead" and not player.Character:FindFirstChild("ForceField") and player.Character:FindFirstChild(getgenv().settings.aimbotPart) then
                     local partPos, onScreen = game:GetService("Workspace").CurrentCamera:WorldToViewportPoint(player.Character[getgenv().settings.aimbotPart].Position)
@@ -722,10 +759,10 @@ isLoaded = true
 if getgenv().settings.playerESP and isLoaded then
     for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
         if player ~= localPlr and player.Character and getgenv().settings.playerESP then
-            esp(player.Character:WaitForChild("Head"), player.Name, player, Color3.fromRGB(255,255,255))
+            esp(player.Character:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
             
             player.CharacterAdded:Connect(function(playerChar)
-                esp(playerChar:WaitForChild("Head"), player.Name, player, Color3.fromRGB(255,255,255))
+                esp(playerChar:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
             end)
         end
     end
