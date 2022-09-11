@@ -5,10 +5,11 @@ if getgenv().Rogue_AlreadyLoaded ~= nil then error("Rogue Hub was already found 
 if game.PlaceId ~= 8227619186 then return end
 
 local func
+local exploitFunction = isexecutorclosure or is_synapse_function or is_exploit_function
 
-if getgc and hookfunction then
+if getgc and hookfunction and exploitFunction then
     for _, garbage in ipairs(getgc()) do
-        if type(garbage) == "function" and not is_synapse_function(garbage) and debug.getinfo(garbage).name == "kick" then
+        if type(garbage) == "function" and not exploitFunction(garbage) and debug.getinfo(garbage).name == "kick" then
             func = garbage
             task.wait()
         end
@@ -496,7 +497,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
     
     if getgenv().settings.spamLoop then
-        game:GetService("ReplicatedStorage").Interactions.Server.SendChatMessage:FireServer(message)    
+        game:GetService("ReplicatedStorage").Interactions.Server.SendChatMessage:FireServer(getgenv().settings.message)    
     end
     
     if getgenv().settings.playerForce and localPlr.Character ~= nil then
