@@ -45,7 +45,8 @@ getgenv().settings = {
     message = "Leading a new way to exploit - Rogue Hub",
     walkSpeed = 16,
     jumpPower = 50,
-    playerForce = false
+    playerForce = false,
+    infJump = false
 }
 
 if makefolder and isfolder and not isfolder("Rogue Hub") then
@@ -175,9 +176,14 @@ localPlr.Settings.InRound.Changed:Connect(function(bool)
     end)
 end)
 
--- Players
+-- Player
 
 local playerSec = mainTab:CreateSection("Player")
+
+playerSec:CreateToggle("Infinite Jump", getgenv().settings.infJump or false, function(bool)
+    getgenv().settings.infJump = bool
+    saveSettings()
+end)
 
 local gemTog = playerSec:CreateToggle("Gems Farm", getgenv().settings.gemtog or false, function(bool)
     getgenv().settings.gemtog = bool
@@ -512,6 +518,10 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 v.Material = "Plastic"
             end
         end 
+    end
+    
+    if localPlr.Character ~= nil and getgenv().settings.infJump and game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
+        localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
     
     wait()
