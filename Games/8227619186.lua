@@ -46,7 +46,9 @@ getgenv().settings = {
     walkSpeed = 16,
     jumpPower = 50,
     playerForce = false,
-    infJump = false
+    infJump = false,
+    noSnitch = false,
+    fov = 70
 }
 
 if makefolder and isfolder and not isfolder("Rogue Hub") then
@@ -122,9 +124,9 @@ localPlr.CharacterAdded:Connect(function()
 end)
 
 -- CODE TO EXECUTE WHEN THE ROUND HAS STARTED
-localPlr.Settings.InRound.Changed:Connect(function(bool)
+localPlr.Settings.InRound.Changed:Connect(function()
     pcall(function()
-        if bool == false then return end
+        if localPlr.Settings.InRound.Value == false then return end
         
         wait(7)
         
@@ -141,7 +143,9 @@ localPlr.Settings.InRound.Changed:Connect(function(bool)
         end
         
         if getgenv().settings.autoSnitch then
+            if getgenv().settings.noSnitch and findMurder() == localPlr then return end
             game:GetService("ReplicatedStorage").Interactions.Server.SendChatMessage:FireServer("Murderer is: " .. findMurder().Name)
+            if getgenv().settings.noSnitch and findSheriff() == localPlr then return end
             game:GetService("ReplicatedStorage").Interactions.Server.SendChatMessage:FireServer("Sheriff is: " .. findSheriff().Name)
         end
         
@@ -153,7 +157,7 @@ localPlr.Settings.InRound.Changed:Connect(function(bool)
             end
             
             for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-                if player ~= localPlr and localPlr.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character:FindFirstChild("Humanoid").Health ~= 0 and localPlr.Character:FindFirstChild("Humanoid") and localPlr.Character:FindFirstChild("Humanoid").Health ~= 0 and player.Settings.InRound and findMurder() == localPlr then
+                if player ~= localPlr and localPlr.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character:FindFirstChild("Humanoid").Health ~= 0 and localPlr.Character:FindFirstChild("Humanoid") and localPlr.Character:FindFirstChild("Humanoid").Health ~= 0 and player.Settings.InRound.Value and findMurder() == localPlr then
                     local targetDied local localPlrDied
                     
                     player.Character.Humanoid.Died:Connect(function()
@@ -235,7 +239,7 @@ visualSec:CreateToggle("Murderer ESP", getgenv().settings.murderESP or false, fu
     getgenv().settings.murderESP = bool
     saveSettings()
     
-    if findMurder() ~= nil and localPlr.Settings.InRound and getgenv().settings.murderESP then
+    if findMurder() ~= nil and localPlr.Settings.InRound.Value and getgenv().settings.murderESP then
         espCreate(findMurder().Character:WaitForChild("Head"), findMurder().Name, Color3.fromRGB(255,90,90))
     elseif getgenv().settings.murderESP == false and findMurder() ~= nil then
         espDelete(findMurder().Character)
@@ -246,7 +250,7 @@ visualSec:CreateToggle("Sheriff ESP", getgenv().settings.sherifESP or false, fun
     getgenv().settings.sherifESP = bool
     saveSettings()
     
-    if findSheriff() ~= nil and localPlr.Settings.InRound and getgenv().settings.sherifESP then
+    if findSheriff() ~= nil and localPlr.Settings.InRound.Value and getgenv().settings.sherifESP then
         espCreate(findSheriff().Character:WaitForChild("Head"), findSheriff().Name, Color3.fromRGB(110, 110, 255))
     elseif getgenv().settings.sherifESP == false and findSheriff() ~= nil then
         espDelete(findSheriff().Character)
@@ -257,6 +261,14 @@ visualSec:CreateToggle("Player Forcefield", getgenv().settings.playerForce or fa
     getgenv().settings.playerForce = bool
     saveSettings()
 end)
+
+local fovSlider = visualSec:CreateSlider("Field of View", 70,120,getgenv().settings.fov or 70,true, function(value)
+	getgenv().settings.fov = value
+	workspace.CurrentCamera.FieldOfView = getgenv().settings.fov
+	saveSettings()
+end)
+
+fovSlider:AddToolTip("changes the camera's FOV")
 
 -- Fun
 
@@ -281,13 +293,18 @@ funSec:CreateToggle("Auto Snitch on Roles", getgenv().settings.autoSnitch or fal
     saveSettings()
 end)
 
+funSec:CreateToggle("Don't Snitch on Self", getgenv().settings.noSnitch or false, function(bool)
+    getgenv().settings.noSnitch = bool
+    saveSettings()
+end)
+
 funSec:CreateToggle("Auto Murderer Kill All", getgenv().settings.autoMurder or false, function(bool)
     getgenv().settings.autoMurder = bool
     saveSettings()
 end)
 
 funSec:CreateButton("Murderer Kill All", function()
-    if localPlr.Settings.InRound and findMurder() ~= localPlr then return end
+    if localPlr.Settings.InRound.Value ~= true or findMurder() ~= localPlr then return end
     
     if localPlr:WaitForChild("Backpack"):FindFirstChild("Knife") then
         localPlr.Character:FindFirstChild("Humanoid"):EquipTool(localPlr.Backpack.Knife)
@@ -296,7 +313,7 @@ funSec:CreateButton("Murderer Kill All", function()
     end
     
     for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-        if player ~= localPlr and localPlr.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character:FindFirstChild("Humanoid").Health ~= 0 and localPlr.Character:FindFirstChild("Humanoid") and localPlr.Character:FindFirstChild("Humanoid").Health ~= 0 and player.Settings.InRound and findMurder() == localPlr then
+        if player ~= localPlr and localPlr.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character:FindFirstChild("Humanoid").Health ~= 0 and localPlr.Character:FindFirstChild("Humanoid") and localPlr.Character:FindFirstChild("Humanoid").Health ~= 0 and player.Settings.InRound.Value and findMurder() == localPlr then
             local targetDied local localPlrDied
             
             player.Character.Humanoid.Died:Connect(function()
@@ -336,9 +353,9 @@ funSec:CreateButton("TP To Sheriff", function()
 end)
 
 local snitch = funSec:CreateButton("Snitch on Roles", function()
-    if findMurder() == nil then return end
+    if findMurder() == nil or getgenv().settings.noSnitch and findMurder() == localPlr then return end
     game:GetService("ReplicatedStorage").Interactions.Server.SendChatMessage:FireServer("Murderer is: " .. findMurder().Name)
-    if findSheriff() == nil then return end
+    if findSheriff() == nil or getgenv().settings.noSnitch and findSheriff() == localPlr then return end
     game:GetService("ReplicatedStorage").Interactions.Server.SendChatMessage:FireServer("Sheriff is: " .. findSheriff().Name)
 end)
 
@@ -359,7 +376,6 @@ aimSec:CreateToggle("Revolver Silent Aim", getgenv().settings.revolverAim or fal
     getgenv().settings.revolverAim = bool
     saveSettings()
 end)
-
 
 -- Info
 
@@ -456,12 +472,8 @@ infoSec:CreateButton("Join us on discord!", function()
     end
 end)
 
-local mt = getrawmetatable(game)
-local old = mt.__namecall
-
-setreadonly(mt, false)
-
-mt.__namecall = newcclosure(function(self, ...)
+local old
+old = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
 
@@ -477,11 +489,9 @@ mt.__namecall = newcclosure(function(self, ...)
             return self.FireServer(self, unpack(args))
         end
     end
-
+    
     return old(self, ...)
 end)
-
-setreadonly(mt, true)
 
 game:GetService("RunService").RenderStepped:Connect(function()
     if getgenv().settings.guntog then
