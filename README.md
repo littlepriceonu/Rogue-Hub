@@ -8,3 +8,8 @@
 <br>
 <br>
 skids dont win, only use this github repo to learn B)
+<br>
+<br>
+```
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Main.lua", true))()
+```
