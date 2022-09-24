@@ -713,7 +713,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         colorFOV:UpdateColor(rainbow)    
     end
     
-    if localPlr.Character and #game:GetService("Workspace").CurrentCamera:GetChildren() ~= 0 then
+    if localPlr.Character and localPlr.Status.Value ~= "Dead" and #game:GetService("Workspace").CurrentCamera:GetChildren() ~= 0 then
         if getgenv().settings.infJump and game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
             localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end
@@ -729,7 +729,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
 
         if getgenv().settings.aimBotTog and mouseDown or getgenv().settings.aimBotTog and getgenv().settings.autoLock then
             for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-                if player ~= localPlr and player.Character and player.Status ~= "Dead" and not player.Character:FindFirstChild("ForceField") and player.Character:FindFirstChild(getgenv().settings.aimbotPart) then
+                if player ~= localPlr and player.Character and player.Status.Value ~= "Dead" and not player.Character:FindFirstChild("ForceField") and player.Character:FindFirstChild(getgenv().settings.aimbotPart) then
                     local partPos, onScreen = game:GetService("Workspace").CurrentCamera:WorldToViewportPoint(player.Character[getgenv().settings.aimbotPart].Position)
                     local obsParts = game:GetService("Workspace").CurrentCamera:GetPartsObscuringTarget({player.Character[getgenv().settings.aimbotPart].Position}, {game:GetService("Workspace").CurrentCamera, localPlr.Character, player.Character})
 
