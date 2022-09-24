@@ -1,4 +1,4 @@
-# __Rogue Hub__
+# _Rogue Hub_
 [YouTube Channel](https://www.youtube.com/channel/UC9R30r3RanVhs0CkPpFb8iA) · [Discord Server](https://discord.com/invite/uzXNguueug) · [Script](https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/LOADSTRING.lua)
 <br>
 <br>
