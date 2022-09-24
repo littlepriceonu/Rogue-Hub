@@ -42,47 +42,6 @@ local localPlr = game:GetService("Players").LocalPlayer
 local mouseDown = false
 local isLoaded = false
 
-local toxicPhrases = {
-    "you got clapped bruv",
-    "nice one",
-    "obviously, im better :p",
-    "try harder next time",
-    "practice a lil more",
-    "could of won if you were good",
-    "try coping harder",
-    "Kitzoon 7750 was here",
-    "goofy ahh noob",
-    "get gud",
-    "badddd",
-    "join the el' bozo party",
-    "you wish you were me",
-    "should quit this game if you play like that",
-    "wanna-be tryhard",
-    "TRAIN LOL",
-    "my grandma plays better then you",
-    "literally garbago",
-    "9/11 was such a tragedy, sad that you are too",
-    "if common sense is common, why are you without it",
-    "sorry, not sorry",
-    "its been a year daddy, I really really miss you - quote from you",
-    "your with stupid",
-    "you doo doo bruv",
-    "never was you, never want to be you",
-    "rogue hub mega haram!",
-    "cant get me :)",
-    "join the chads .gg/uzXNguueug",
-    "LL dsc.gg/uzXNguueug",
-    "cry about it",
-    "SISSY BOY",
-    "jajajajajaja",
-    "boo-hoo :C",
-    "cry baby boy",
-    "toch gras",
-    "legit so mad LOL",
-    "mad cus you bad",
-    "not using rogue hub... imagine",
-    "kyron was also here!!!111!!!"
-}
 
 getgenv().settings = {
     infJump = false,
@@ -115,7 +74,7 @@ getgenv().settings = {
 
 if makefolder and isfolder and not isfolder("Rogue Hub") then
     makefolder("Rogue Hub")
-    
+
     makefolder("Rogue Hub/Configs")
     makefolder("Rogue Hub/Data")
 end
@@ -130,9 +89,14 @@ local function saveSettings()
     end
 end
 
+function getQuote()
+    local userQuotes = game:GetService("HttpService"):JSONDecode(readfile("/Rogue Hub/Configs/Quotes.ROGUEHUB"))
+    return userQuotes[math.random(#userQuotes)]
+end
+
 local function getGun(player)
     if #game:GetService("Workspace").CurrentCamera:GetChildren() == 0 then return nil end
-    
+
     for _, v in ipairs(player:GetChildren()) do
         if v:IsA("Model") and v:FindFirstChild("Fire") then
             return v
@@ -225,7 +189,7 @@ local toxicTog = playerSec:CreateToggle("Auto Toxic", getgenv().settings.toxicAu
         localPlr.leaderstats.Kills:GetPropertyChangedSignal("Value"):Connect(function()
             if not getgenv().settings.toxicAuto then return end
             
-            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(toxicPhrases[math.random(#toxicPhrases)], "All")
+            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(getQuote(), "All")
         end)
     end
 end)
