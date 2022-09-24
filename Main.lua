@@ -16,9 +16,13 @@ end
 
 if makefolder and isfolder and not isfolder("Rogue Hub") then
     makefolder("Rogue Hub")
-    
+
     makefolder("Rogue Hub/Configs")
     makefolder("Rogue Hub/Data")
+end
+
+if not isfile("/Rogue Hub/Configs/Quotes.ROGUEHUB") then 
+    writefile("/Rogue Hub/Configs/Quotes.ROGUEHUB", req({ Url = "https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Extra/Quotes.ROGUEHUB" }).Body);
 end
 
 local response = req({
