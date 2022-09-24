@@ -7,4 +7,4 @@
 ![Rogue Hub Slap Battles Script](https://cdn.discordapp.com/attachments/1022560613341335682/1022912565271068702/unknown.png)
 <br>
 <br>
-skids dont win, only use this github repo to learn B)
+**skids dont win, only use this github repo to learn B)**
