@@ -39,43 +39,6 @@ local Config = {
     Keybind = Enum.KeyCode.RightControl
 }
 
-local toxicPhrases = {
-    "you got clapped",
-    "nice one",
-    "obviously, im better :p",
-    "try harder next time",
-    "practice a lil more",
-    "could of won if you were good",
-    "try coping harder",
-    "Kitzoon 7750 was here",
-    "may the slap gods slap you from mother earth",
-    "goofy ahh noob",
-    "get gud",
-    "badddd",
-    "join the el' bozo party",
-    "you wish you were me",
-    "should quit this game if you play like that",
-    "wanna-be tryhard",
-    "TRAIN LOL",
-    "my grandma plays better then you",
-    "literally garbago",
-    "9/11 was such a tragedy, sad that you are too",
-    "if common sense is common, why are you without it",
-    "sorry, not sorry",
-    "its been a year daddy, I really really miss you - quote from you",
-    "your with stupid",
-    "you doo doo bruv",
-    "notice me tencelll!!!!!!!!!!!!!!",
-    "2022-07-31",
-    "never was you, never want to be you",
-    "rogue hub mega haram!",
-    "cant get me :)",
-    "join the chads .gg/uzXNguueug",
-    "your slap battles experience greatly ruined by dsc.gg/uzXNguueug",
-    "toch gras",
-    "kyron was also here!!!111!!!"
-}
-
 local localPlr = game:GetService("Players").LocalPlayer
 
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BracketV3.lua"))()
@@ -124,6 +87,11 @@ local function saveSettings()
     if writefile then
         writefile("Rogue Hub/Configs/SlapBattles_Config.ROGUEHUB", game:GetService("HttpService"):JSONEncode(getgenv().settings))
     end
+end
+
+function getQuote()
+    local userQuotes = game:GetService("HttpService"):JSONDecode(readfile("/Rogue Hub/Configs/Quotes.ROGUEHUB"))
+    return userQuotes[math.random(#userQuotes)]
 end
 
 local function getTool()
@@ -194,13 +162,13 @@ local toxicTog = playerSec:CreateToggle("Auto Toxic", getgenv().settings.autoTox
         localPlr.leaderstats.Slaps:GetPropertyChangedSignal("Value"):Connect(function()
             if not getgenv().settings.autoToxic then return end
             
-            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(toxicPhrases[math.random(#toxicPhrases)], "All")
+            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(getQuote(), "All")
         end)
     elseif getgenv().settings.autoToxic and game.PlaceId == 9431156611 then
         localPlr.Slaps:GetPropertyChangedSignal("Value"):Connect(function()
             if not getgenv().settings.autoToxic then return end
             
-            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(toxicPhrases[math.random(#toxicPhrases)], "All")
+            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(getQuote(), "All")
         end)
     end
 end)
