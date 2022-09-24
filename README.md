@@ -1,5 +1,5 @@
 # Rogue Hub
-[I'm an inline-style link](https://www.google.com)
+[YouTube Channel](https://www.youtube.com/channel/UC9R30r3RanVhs0CkPpFb8iA)·[YouTube Channel](https://www.youtube.com/channel/UC9R30r3RanVhs0CkPpFb8iA)
 skids dont win, only use this github repo to learn B)
 <br>
 <br>
