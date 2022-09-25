@@ -7,6 +7,12 @@ if syn then
   print("DohmBoy is cool!")
 end
 
+local teleportFunc = queueonteleport or queue_on_teleport or syn and syn.queue_on_teleport
+
+if teleportFunc then
+    teleportFunc([[loadstring(game:HttpGet("https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Main.lua", true))()]])
+end
+
 -- walkspeed anticheat bypass for slap royale
 if game.PlaceId == 9431156611 and getrawmetatable then
     local gmt = getrawmetatable(game)
@@ -69,7 +75,9 @@ getgenv().settings = {
     fov = 70,
     spamFart = false,
     spin = false,
-    spinSpeed = 10
+    spinSpeed = 10,
+    autoEquip = false,
+    wallNoclip = false
 }
 
 if makefolder and isfolder and not isfolder("Rogue Hub") then
@@ -103,7 +111,10 @@ local function getTool()
 end
 
 localPlr.CharacterAdded:Connect(function()
-    localPlr.Character:WaitForChild("Humanoid")
+    local humanoid = localPlr.Character:WaitForChild("Humanoid")
+    
+    humanoid.WalkSpeed = getgenv().settings.walkSpeed or 20
+    humanoid.JumpPower = getgenv().settings.jumpPower or 50
     
     task.wait(3)
     
@@ -133,8 +144,16 @@ localPlr.CharacterAdded:Connect(function()
         end)
     end
     
+    if getgenv().settings.wallNoclip then
+        localPlr.Character:FindFirstChild("HumanoidRootPart").Touched:Connect(function(part)
+            if part.Name == "wall" and getgenv().settings.wallNoclip then
+                part.CanCollide = not getgenv().settings.wallNoclip
+            end
+        end)
+    end
+    
     repeat task.wait() until getTool() ~= nil
-        
+    
     if getgenv().settings.auraSlap and getgenv().settings.auraOption == "Legit" then
         getTool().Glove.Touched:Connect(function(part)
             if part.Parent:FindFirstChildOfClass("Humanoid") and getgenv().settings.auraSlap and getgenv().settings.auraOption == "Legit" then
@@ -149,33 +168,29 @@ end)
 
 local playerSec = mainTab:CreateSection("Player")
 
-playerSec:CreateToggle("Autoclicker", getgenv().settings.autoClicker, function(bool)
+playerSec:CreateToggle("Autoclicker", getgenv().settings.autoClicker or false, function(bool)
     getgenv().settings.autoClicker = bool
     saveSettings()
 end)
 
-local toxicTog = playerSec:CreateToggle("Auto Toxic", getgenv().settings.autoToxic, function(bool)
-    getgenv().settings.autoToxic = bool
-    saveSettings()
+if game.PlaceId ~= 9431156611 then
+    local toxicTog = playerSec:CreateToggle("Auto Toxic", getgenv().settings.autoToxic or false, function(bool)
+        getgenv().settings.autoToxic = bool
+        saveSettings()
+        
+        if getgenv().settings.autoToxic then
+            localPlr.leaderstats.Slaps:GetPropertyChangedSignal("Value"):Connect(function()
+                if not getgenv().settings.autoToxic then return end
+                
+                game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(getQuote(), "All")
+            end)
+        end
+    end)
     
-    if getgenv().settings.autoToxic and game.PlaceId ~= 9431156611 then
-        localPlr.leaderstats.Slaps:GetPropertyChangedSignal("Value"):Connect(function()
-            if not getgenv().settings.autoToxic then return end
-            
-            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(getQuote(), "All")
-        end)
-    elseif getgenv().settings.autoToxic and game.PlaceId == 9431156611 then
-        localPlr.Slaps:GetPropertyChangedSignal("Value"):Connect(function()
-            if not getgenv().settings.autoToxic then return end
-            
-            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(getQuote(), "All")
-        end)
-    end
-end)
-    
-toxicTog:AddToolTip("automatically says a toxic phrase when you slap someone")
+    toxicTog:AddToolTip("automatically says a toxic phrase when you slap someone")
+end
 
-local noRagTog = playerSec:CreateToggle("Anti Ragdoll", getgenv().settings.noRagdoll, function(bool)
+local noRagTog = playerSec:CreateToggle("Anti Ragdoll", getgenv().settings.noRagdoll or false, function(bool)
     getgenv().settings.noRagdoll = bool
     saveSettings()
     
@@ -199,7 +214,7 @@ end)
 noRagTog:AddToolTip("looks clunky, but works good")
 
 if game.PlaceId ~= 9431156611 then
-    local reaperGod = playerSec:CreateToggle("Reaper Godmode", getgenv().settings.noReaper, function(bool)
+    local reaperGod = playerSec:CreateToggle("Reaper Godmode", getgenv().settings.noReaper or false, function(bool)
         getgenv().settings.noReaper = bool
         saveSettings()
         
@@ -224,7 +239,7 @@ if game.PlaceId ~= 9431156611 then
     
     reaperGod:AddToolTip("immune from the reaper death ability")
     
-    local rockGod = playerSec:CreateToggle("Rock Godmode", getgenv().settings.noRock, function(bool)
+    local rockGod = playerSec:CreateToggle("Rock Godmode", getgenv().settings.noRock or false, function(bool)
         getgenv().settings.noRock = bool
         saveSettings()
         
@@ -239,40 +254,54 @@ if game.PlaceId ~= 9431156611 then
     
     rockGod:AddToolTip("immune from dangerous rocks! sometimes works, sometimes doesnt")
     
-    playerSec:CreateToggle("Move in Timestop & Cutscenes", getgenv().settings.noTimestop, function(bool)
+    local noClipWall = playerSec:CreateToggle("Giant Wall Noclip", getgenv().settings.wallNoclip or false, function(bool)
+        getgenv().settings.wallNoclip = bool
+        saveSettings()
+        
+        if getgenv().settings.wallNoclip then
+            localPlr.Character:FindFirstChild("HumanoidRootPart").Touched:Connect(function(part)
+                if part.Name == "wall" and getgenv().settings.wallNoclip then
+                    part.CanCollide = not getgenv().settings.wallNoclip
+                end
+            end)
+        end
+    end)
+    
+    noClipWall:AddToolTip("clip's through the giant wall ability.")
+    
+    playerSec:CreateToggle("Move in Timestop & Cutscenes", getgenv().settings.noTimestop or false, function(bool)
         getgenv().settings.noTimestop = bool
         saveSettings()
     end)
 
-    playerSec:CreateToggle("Anti Void", getgenv().settings.noVoid, function(bool)
+    playerSec:CreateToggle("Anti Void", getgenv().settings.noVoid or false, function(bool)
         getgenv().settings.noVoid = bool
-        saveSettings()
-        
         game:GetService("Workspace").dedBarrier.CanCollide = getgenv().settings.noVoid
+        saveSettings()
     end)
     
-    game:GetService("Workspace").dedBarrier.CanCollide = getgenv().settings.noVoid
+    game:GetService("Workspace").dedBarrier.CanCollide = getgenv().settings.noVoid or false
 end
 
-local spinTog = playerSec:CreateToggle("Spin", getgenv().settings.spin, function(bool)
+local spinTog = playerSec:CreateToggle("Spin", getgenv().settings.spin or false, function(bool)
     getgenv().settings.spin = bool
     saveSettings()
 end)
 
 spinTog:AddToolTip("Makes your player spin around, looks derpy :D")
 
-playerSec:CreateSlider("Spin Speed", 10,100,getgenv().settings.spinSpeed,true, function(value)
+playerSec:CreateSlider("Spin Speed", 10,100,getgenv().settings.spinSpeed or 10,true, function(value)
 	getgenv().settings.spinSpeed = value
 	saveSettings()
 end)
 
-playerSec:CreateSlider("Walk Speed", 20,50,getgenv().settings.walkSpeed,true, function(value)
+playerSec:CreateSlider("Walk Speed", 20,50,getgenv().settings.walkSpeed or 20,true, function(value)
 	getgenv().settings.walkSpeed = value
     localPlr.Character.Humanoid.WalkSpeed = getgenv().settings.walkSpeed
 	saveSettings()
 end)
 
-playerSec:CreateSlider("Jump Power", 50,100,getgenv().settings.jumpPower,true, function(value)
+playerSec:CreateSlider("Jump Power", 50,100,getgenv().settings.jumpPower or 50,true, function(value)
 	getgenv().settings.jumpPower = value
 	localPlr.Character.Humanoid.JumpPower = getgenv().settings.jumpPower
 	saveSettings()
@@ -327,7 +356,7 @@ if game.PlaceId ~= 9431156611 then
 end
 
 if game.PlaceId ~= 9431156611 then
-    local fartTog = gloveSec:CreateToggle("Fart Spam", false, function(bool)
+    local fartTog = gloveSec:CreateToggle("Fart Spam", getgenv().settings.spamFart or false, function(bool)
         getgenv().settings.spamFart = bool
         saveSettings()
     end)
@@ -335,23 +364,37 @@ if game.PlaceId ~= 9431156611 then
     fartTog:AddToolTip("no explanation needed, only works for the default glove") 
 end
 
-gloveSec:CreateToggle("Glove Extender", getgenv().settings.gloveExtend, function(bool)
+local equip = gloveSec:CreateToggle("Auto Equip", getgenv().settings.autoEquip or false, function(bool)
+    getgenv().settings.autoEquip = bool
+    saveSettings()
+end)
+    
+equip:AddToolTip("Automatically equips when you left click and your glove is not equipped.")
+    
+localPlr:GetMouse().Button1Down:Connect(function()
+    if getgenv().settings.autoEquip and localPlr.Character:FindFirstChild("entered") ~= nil and localPlr:WaitForChild("Backpack"):FindFirstChildOfClass("Tool") ~= nil then
+        localPlr.Character.Humanoid:EquipTool(getTool())
+        getTool():Activate()
+    end
+end)
+
+gloveSec:CreateToggle("Glove Extender", getgenv().settings.gloveExtend or false, function(bool)
     getgenv().settings.gloveExtend = bool
     saveSettings()
 end)
 
-local extendDrop = gloveSec:CreateDropdown("Extender Type", {"Meat Stick","Pancake", "Growth"}, function(option)
+local extendDrop = gloveSec:CreateDropdown("Extender Type", {"Meat Stick","Pancake", "Growth", "Slight Extend"}, function(option)
 	getgenv().settings.extendOption = option
 	saveSettings()
 end)
 
-extendDrop:SetOption(getgenv().settings.extendOption)
+extendDrop:SetOption(getgenv().settings.extendOption or "Meat Stick")
 
 if game.PlaceId ~= 9431156611 then
     -- Auto Join
     local joinSec = mainTab:CreateSection("Auto Join")
     
-    local autoEnabled = joinSec:CreateToggle("Enabled", getgenv().settings.autoJoin, function(bool)
+    local autoEnabled = joinSec:CreateToggle("Enabled", getgenv().settings.autoJoin or false, function(bool)
         getgenv().settings.autoJoin = bool
         saveSettings()
     end)
@@ -363,14 +406,14 @@ if game.PlaceId ~= 9431156611 then
     	saveSettings()
     end)
     
-    joinDrop:SetOption(getgenv().settings.joinOption)
+    joinDrop:SetOption(getgenv().settings.joinOption or "Normal Arena")
 end
 
 -- Slap aura
 
 local auraSec = mainTab:CreateSection("Slap Aura")
 
-auraSec:CreateToggle("Enabled", getgenv().settings.auraSlap, function(bool)
+auraSec:CreateToggle("Enabled", getgenv().settings.auraSlap or false, function(bool)
     getgenv().settings.auraSlap = bool
     saveSettings()
     
@@ -407,21 +450,21 @@ local auraDrop = auraSec:CreateDropdown("Type", {"Legit","Blatant"}, function(op
 	end
 end)
 
-auraDrop:SetOption(getgenv().settings.auraOption)
+auraDrop:SetOption(getgenv().settings.auraOption or "Blatant")
 
 -- Visuals
 
 local visualSec = mainTab:CreateSection("Visuals")
 
 if game.PlaceId ~= 9431156611 then
-    local rainbowVoidTog = visualSec:CreateToggle("Rainbow Void", getgenv().settings.voidRainbow, function(bool)
+    local rainbowVoidTog = visualSec:CreateToggle("Rainbow Void", getgenv().settings.voidRainbow or false, function(bool)
         getgenv().settings.voidRainbow = bool
         saveSettings()
     end)
     
     rainbowVoidTog:AddToolTip("changes the void's color to rainbow")
     
-    local forceVoidTog = visualSec:CreateToggle("ForceField Void", getgenv().settings.voidForce, function(bool)
+    local forceVoidTog = visualSec:CreateToggle("ForceField Void", getgenv().settings.voidForce or false, function(bool)
         getgenv().settings.voidForce = bool
         saveSettings()
     end)
@@ -429,14 +472,14 @@ if game.PlaceId ~= 9431156611 then
     forceVoidTog:AddToolTip("changes the void's material to a forcefield")
 end
 
-local forcePlayerTog = visualSec:CreateToggle("ForceField Player", getgenv().settings.playerForce, function(bool)
+local forcePlayerTog = visualSec:CreateToggle("ForceField Player", getgenv().settings.playerForce or false, function(bool)
     getgenv().settings.playerForce = bool
     saveSettings()
 end)
 
 forcePlayerTog:AddToolTip("changes your player's material to a forcefield")
 
-local fovSlider = visualSec:CreateSlider("Field of View", 70,120,getgenv().settings.fov,true, function(value)
+local fovSlider = visualSec:CreateSlider("Field of View", 70,120,getgenv().settings.fov or 70,true, function(value)
 	getgenv().settings.fov = value
 	game:GetService("Workspace").CurrentCamera.FieldOfView = getgenv().settings.fov
 	saveSettings()
@@ -546,8 +589,11 @@ game:GetService("RunService").RenderStepped:Connect(function()
         elseif getgenv().settings.gloveExtend and getgenv().settings.extendOption == "Growth" and getTool():FindFirstChild("Glove").Size ~= Vector3.new(25, 25, 25) then
             getTool().Glove.Transparency = 0.5
             getTool().Glove.Size = Vector3.new(25, 25, 25)
+        elseif getgenv().settings.gloveExtend and getgenv().settings.extendOption == "Slight Extend" and getTool():FindFirstChild("Glove").Size ~= Vector3.new(0, 3.5, 2) then
+            getTool().Glove.Transparency = 0
+            getTool().Glove.Size = Vector3.new(2.5, 3.5, 2)
         elseif getgenv().settings.gloveExtend == false then
-            getTool().Glove.Transparency = 1
+            getTool().Glove.Transparency = 0
             getTool().Glove.Size = Vector3.new(2.5, 2.5, 1.7)
         end
 
