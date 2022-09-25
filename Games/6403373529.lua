@@ -111,7 +111,7 @@ localPlr.CharacterAdded:Connect(function()
         if localPlr.Character.HumanoidRootPart == nil then return end
         
         localPlr.Character.Ragdolled:GetPropertyChangedSignal("Value"):Connect(function()
-            if localPlr.Character.HumanoidRootPart == nil then return end
+            if localPlr.Character.HumanoidRootPart == nil or getgenv().settings.noRagdoll == false then return end
             
             local oldCFrame = localPlr.Character.HumanoidRootPart.CFrame
             
@@ -182,6 +182,8 @@ local noRagTog = playerSec:CreateToggle("Anti Ragdoll", getgenv().settings.noRag
     if getgenv().settings.noRagdoll and localPlr.Character:FindFirstChildOfClass("Humanoid") then
         localPlr.Character.Ragdolled:GetPropertyChangedSignal("Value"):Connect(function()
             if localPlr.Character:FindFirstChild("HumanoidRootPart") then
+                if localPlr.Character.HumanoidRootPart == nil or getgenv().settings.noRagdoll == false then return end
+                
                 local oldCFrame = localPlr.Character.HumanoidRootPart.CFrame
                 
                 repeat task.wait()
@@ -266,11 +268,13 @@ end)
 
 playerSec:CreateSlider("Walk Speed", 20,50,getgenv().settings.walkSpeed,true, function(value)
 	getgenv().settings.walkSpeed = value
+    localPlr.Character.Humanoid.WalkSpeed = getgenv().settings.walkSpeed
 	saveSettings()
 end)
 
 playerSec:CreateSlider("Jump Power", 50,100,getgenv().settings.jumpPower,true, function(value)
 	getgenv().settings.jumpPower = value
+	localPlr.Character.Humanoid.JumpPower = getgenv().settings.jumpPower
 	saveSettings()
 end)
 
@@ -285,14 +289,22 @@ if game.PlaceId ~= 9431156611 then
         while task.wait() and getgenv().slapFarm do
             if game.PlaceId ~= 9431156611 then
                 for _, target in next, game:GetService("Players"):GetPlayers() do
-                    if target.Character ~= nil and target.Character:FindFirstChild("entered") ~= nil and localPlr.Character:FindFirstChild("entered") ~= nil and target.Character:FindFirstChild("rock") == nil and target.Character:FindFirstChild("Ragdolled").Value == false and target.Character:FindFirstChild("Reverse") == nil and target.Character:FindFirstChild("Right Arm") and target.Character:FindFirstChild("Error") == nil and target.Character:FindFirstChild("Orbit") == nil and target.Character:FindFirstChild("Spectator") == nil and target.Backpack:FindFirstChild("Spectator") == nil and getgenv().slapFarm then
+                    if target ~= localPlr and target.Character ~= nil and target.Character:FindFirstChild("entered") ~= nil and localPlr.Character:FindFirstChild("entered") ~= nil and target.Character:FindFirstChild("rock") == nil and target.Character:FindFirstChild("Ragdolled").Value == false and target.Character:FindFirstChild("Reverse") == nil and target.Character:FindFirstChild("Right Arm") and target.Character:FindFirstChild("Error") == nil and target.Character:FindFirstChild("Orbit") == nil and target.Character:FindFirstChild("Spectator") == nil and target.Backpack:FindFirstChild("Spectator") == nil and getgenv().slapFarm then
                         if getTool() ~= nil and getTool().Name == "Default" and getgenv().slapFarm then
                             localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,15,0)
+                            wait(0.3)
                             game:GetService("ReplicatedStorage").b:FireServer(target.Character["Right Arm"])
+                        elseif getTool() ~= nil and getTool().Name == "Bull" and getgenv().slapFarm then
+                            localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,15,0)
+                            wait(0.3)
+                            game:GetService("ReplicatedStorage").BullHit:FireServer(target.Character["Right Arm"])
                         elseif getTool() ~= nil and getTool().Name ~= "Default" and getgenv().slapFarm then
                             localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,3.5)
+                            wait(0.3)
                             getTool():Activate()
                         end
+                        
+                        wait(0.3)
                     end
                 end
             else
@@ -301,7 +313,7 @@ if game.PlaceId ~= 9431156611 then
                         if getTool() ~= nil and getTool().Name == "Pack-A-Punch" and getgenv().slapFarm then
                             localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,15,0)
                             game:GetService("ReplicatedStorage").Events.Slap:FireServer(target.Character["Right Arm"])
-                        elseif getTool() ~= nil and getTool().Name ~= "Default" and getgenv().slapFarm then
+                        elseif getTool() ~= nil and getTool().Name ~= "Pack-A-Punch" and getgenv().slapFarm then
                             localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,3.5)
                             getTool():Activate()
                         end
@@ -366,7 +378,7 @@ auraSec:CreateToggle("Enabled", getgenv().settings.auraSlap, function(bool)
 
     if getgenv().settings.auraSlap and getgenv().settings.auraOption == "Legit" then
         getTool().Glove.Touched:Connect(function(part)
-            if part.Parent:FindFirstChildOfClass("Humanoid") and getgenv().settings.auraSlap and getgenv().settings.auraOption == "Legit" then
+            if part.Parent:FindFirstChildOfClass("Humanoid") and getgenv().settings.auraSlap and getgenv().settings.auraOption == "Legit" and not getgenv().slapFarm then
                 getTool():Activate()
                 task.wait(0.3)
             end
@@ -539,7 +551,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             getTool().Glove.Size = Vector3.new(2.5, 2.5, 1.7)
         end
 
-        if getgenv().settings.autoClicker then
+        if getgenv().settings.autoClicker and not getgenv().slapFarm then
             getTool():Activate()
         end
         
@@ -551,16 +563,16 @@ game:GetService("RunService").RenderStepped:Connect(function()
             end
         end
         
-        if getgenv().settings.auraSlap and getgenv().settings.auraOption == "Blatant" then
+        if getgenv().settings.auraSlap and getgenv().settings.auraOption == "Blatant" and not getgenv().slapFarm then
             if game.PlaceId ~= 9431156611 then
                 for _, target in next, game:GetService("Players"):GetPlayers() do
-                    if target.Character and target.Character:FindFirstChild("Humanoid") ~= nil and target.Character:FindFirstChild("rock") == nil and target.Character:FindFirstChild("Reverse") == nil and getgenv().settings.auraOption == "Blatant" and target:DistanceFromCharacter(localPlr.Character.HumanoidRootPart.Position) < 20 and getTool().Name == "Default" then
+                    if target.Character and target.Character:FindFirstChild("Humanoid") ~= nil and target.Character:FindFirstChild("rock") == nil and target.Character:FindFirstChild("Reverse") == nil and getgenv().settings.auraOption == "Blatant" and target:DistanceFromCharacter(localPlr.Character.HumanoidRootPart.Position) <= 20 and getTool().Name == "Default" then
                         game:GetService("ReplicatedStorage").b:FireServer(target.Character.HumanoidRootPart)
                     end
                 end
             else
                 for _, target in next, game:GetService("Players"):GetPlayers() do
-                    if target.Character and target.Character:FindFirstChild("Humanoid") ~= nil and getgenv().settings.auraOption == "Blatant" and target:DistanceFromCharacter(localPlr.Character.HumanoidRootPart.Position) < 20 and getTool().Name == "Pack-A-Punch" then
+                    if target.Character and target.Character:FindFirstChild("Humanoid") ~= nil and getgenv().settings.auraOption == "Blatant" and target:DistanceFromCharacter(localPlr.Character.HumanoidRootPart.Position) <= 20 and getTool().Name == "Pack-A-Punch" then
                         game:GetService("ReplicatedStorage").Events.Slap:FireServer(target.Character.HumanoidRootPart)
                     end
                 end
@@ -596,17 +608,16 @@ game:GetService("RunService").RenderStepped:Connect(function()
         if getgenv().settings.spin and localPlr:GetMouse().Icon ~= "rbxasset://textures/MouseLockedCursor.png" and not getgenv().slapFarm then
             localPlr.Character.HumanoidRootPart.CFrame = localPlr.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(getgenv().settings.spinSpeed), 0)
         end
-        
-        localPlr.Character.Humanoid.WalkSpeed = getgenv().settings.walkSpeed
-        localPlr.Character.Humanoid.JumpPower = getgenv().settings.jumpPower
     end
     
     if getgenv().settings.autoJoin and getgenv().settings.joinOption == "Normal Arena" then
         if game.PlaceId == 9431156611 then return end
         
         if not localPlr.Character:FindFirstChild("entered") and localPlr.Character:FindFirstChild("HumanoidRootPart") then
-            firetouchinterest(localPlr.Character.HumanoidRootPart, game:GetService("Workspace").Lobby.Teleport1, 0)
-            firetouchinterest(localPlr.Character.HumanoidRootPart, game:GetService("Workspace").Lobby.Teleport1, 1)
+            repeat wait(0.5)
+                firetouchinterest(localPlr.Character.HumanoidRootPart, game:GetService("Workspace").Lobby.Teleport1, 0)
+                firetouchinterest(localPlr.Character.HumanoidRootPart, game:GetService("Workspace").Lobby.Teleport1, 1)
+            until localPlr.Character:FindFirstChild("entered") ~= nil
         end
     elseif getgenv().settings.autoJoin and getgenv().settings.joinOption == "Default Only Arena" then
         if game.PlaceId == 9431156611 then return end
