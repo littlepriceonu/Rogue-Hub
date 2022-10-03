@@ -16,20 +16,20 @@ if game.PlaceId ~= 6407649031 then return end
 
 --#region Proformance Functions.
 
-local Guns = {}
+if getgc then
+    local Guns = {}
 
-for i,v in ipairs(getgc(true)) do
-    -- The reason I only do "RecoilMult" and "Damage" is because its really the only things that need to be identified to tell whether its a Gun Properties table or not.
-    if type(v) == "table" and rawget(v, "RecoilMult") and rawget("Damage") then
-        table.insert(Guns, v)
+    for i,v in ipairs(getgc(true)) do
+        -- The reason I only do "RecoilMult" and "Damage" is because its really the only things that need to be identified to tell whether its a Gun Properties table or not.
+        if type(v) == "table" and rawget(v, "RecoilMult") and rawget(v, "Damage") then
+            table.insert(Guns, v)
+        end
     end
-end
-
-print("Gun Tables Found.", "Index:", #Guns)
-
-local function ModifyGuns(Mod, value)
-    for i,v in ipairs(Guns) do
-        v[Mod] = value
+    
+    local function ModifyGuns(Mod, value)
+        for i,v in ipairs(Guns) do
+            v[Mod] = value
+        end
     end
 end
 
