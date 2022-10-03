@@ -14,6 +14,27 @@ if getgenv().Rogue_AlreadyLoaded ~= nil then error("Rogue Hub was already found 
 
 if game.PlaceId ~= 6407649031 then return end
 
+--#region Proformance Functions.
+
+local Guns = {}
+
+for i,v in ipairs(getgc(true)) do
+    -- The reason I only do "RecoilMult" and "Damage" is because its really the only things that need to be identified to tell whether its a Gun Properties table or not.
+    if type(v) == "table" and rawget(v, "RecoilMult") and rawget("Damage") then
+        table.insert(Guns, v)
+    end
+end
+
+print("Gun Tables Found.", "Index:", #Guns)
+
+local function ModifyGuns(Mod, value)
+    for i,v in ipairs(Guns) do
+        v[Mod] = value
+    end
+end
+
+--#endregion
+
 local cambobFunc
 
 if getgc and hookfunction then
@@ -411,17 +432,9 @@ if getgc then
         getgenv().settings.noSpread = bool
 
         if getgenv().settings.noSpread then
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "Spread") then
-                    v.Spread = 0
-                end
-            end
+            ModifyGuns("Spread", 0)
         else
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "Spread") then
-                    v.Spread = 5
-                end
-            end
+            ModifyGuns("Spread", 5)
         end
     end)
 
@@ -430,17 +443,9 @@ if getgc then
         getgenv().settings.noRecoil = bool
 
         if getgenv().settings.noRecoil then
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "RecoilMult") then
-                    v.RecoilMult = 0
-                end
-            end
+            ModifyGuns("RecoilMult", 0)
         else
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "RecoilMult") then
-                    v.RecoilMult = 4
-                end
-            end
+            ModifyGuns("RecoilMult", 4)
         end
     end)
 
@@ -449,19 +454,11 @@ if getgc then
         getgenv().settings.oneHit = bool
 
         if getgenv().settings.oneHit then
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "Damage") then
-                    v.Damage = math.huge
-                    v.HeadshotDmg = math.huge
-                end
-            end
+            ModifyGuns("Damage", math.huge)
+            ModifyGuns("HeadshotDmg", math.huge)
         else
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "Damage") then
-                    v.Damage = 65
-                    v.HeadshotDmg = 90
-                end
-            end
+            ModifyGuns("Damage", 65)
+            ModifyGuns("HeadshotDmg", 90)
         end
     end)
     
@@ -472,17 +469,9 @@ if getgc then
         getgenv().settings.rateFire = bool
 
         if getgenv().settings.rateFire then
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "FireRate") then
-                    v.FireRate = 0
-                end
-            end
+            ModifyGuns("FireRate", 0)
         else
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "FireRate") then
-                    v.FireRate = 0.25
-                end
-            end
+            ModifyGuns("FireRate", 0.25)
         end
     end)
     
@@ -493,17 +482,9 @@ if getgc then
         getgenv().settings.equipInstantly = bool
 
         if getgenv().settings.equipInstantly then
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "EquipTime") then
-                    v.EquipTime = 0
-                end
-            end
+            ModifyGuns("EquipTime", 0)
         else
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "EquipTime") then
-                    v.EquipTime = 0.4
-                end
-            end
+            ModifyGuns("EquipTime", 0.4)
         end
     end)
 
@@ -512,17 +493,9 @@ if getgc then
         getgenv().settings.reloadInstantly = bool
 
         if getgenv().settings.reloadInstantly then
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "ReloadTime") then
-                    v.ReloadTime = 0
-                end
-            end
+            ModifyGuns("ReloadTime", 0)
         else
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "ReloadTime") then
-                    v.ReloadTime = 2.8
-                end
-            end
+            ModifyGuns("ReloadTime", 0.28)
         end
     end)
 
@@ -531,29 +504,17 @@ if getgc then
         getgenv().settings.clipInf = bool
 
         if getgenv().settings.clipInf then
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "ClipSize") then
-                    v.ClipSize = math.huge
-                end
-            end
+            ModifyGuns("ClipSize", math.huge)
         else
-            for _, v in ipairs(getgc(true)) do
-                if type(v) == "table" and rawget(v, "ClipSize") then
-                    v.ClipSize = 7
-                end
-            end
+            ModifyGuns("ClipSize", 7)
         end
     end)
 
     local speedSlider = gunMods:CreateSlider("Walk Speed", 20,500,20,true, function(value)
         if not isLoaded then return end
         getgenv().settings.walkSpeed = value  
-        
-        for _, v in ipairs(getgc(true)) do
-            if type(v) == "table" and rawget(v, "WalkSpeed") then
-                v.WalkSpeed = getgenv().settings.walkSpeed
-            end
-        end
+
+        ModifyGuns("WalkSpeed", getgenv().settings.walkSpeed)
     end)
     
     speedSlider:AddToolTip("Changes your speed, sometimes makes your viewmodel have a seizure (dont use if you suffer from epilepsy, im not kidding)")
