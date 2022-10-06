@@ -138,7 +138,34 @@ end
 local highlights = {}
 local currentEspColor = getgenv().settings.espColor or Color3.new(1,0,0)
 
-local function highlightCharacter(Character)
+-- Check to see if the game's highlight exists again cause it overwrites ours.
+spawn(function()
+    while wait() do
+        for _, plr in ipairs(game.Players:GetChildren()) do
+            if not plr.Character then return end
+
+            local char = plr.Character
+            for _,v in ipairs(char:GetChildren()) do
+                if typeof(v) == "Instance" and v.ClassName == "Highlight" and v.Adornee ~= nil then
+                    print("Highlight Found. Is Adornee nil?:", v.Adornee ~= nil ,", Adornee:", v.Adornee, ", Changing to nil and disabling...")
+                    v.Adornee = nil
+                    v.Enabled = false
+                    for _, h in ipairs(game.Workspace:GetChildren()) do
+                        if h.ClassName == "Highlight" and h.Name == char.Name then
+                            print("Found Our Highlight. Enabling and making Adornee character...")
+                            h.Adornee = char
+                            h.Enabled = getgenv().settings.playerESP or false
+                            break
+                        end
+                    end
+                    break
+                end
+            end
+        end
+    end
+end)
+
+function highlightCharacter(Character)
     local high = Instance.new("Highlight", game.Workspace)
     high.Name = Character.Name
     high.Adornee = Character
@@ -153,7 +180,7 @@ local function highlightCharacter(Character)
 end
 
 -- Player is the Player object, not the character, !If player is nil will toggle all highlights
-local function highlightPlayer(player, toggle)
+function highlightPlayer(player, toggle)
     if (typeof(player) == "Instance" and player.ClassName == "Player") and (player.Character == nil) then return end
     if toggle then
         if player == nil then
@@ -172,7 +199,7 @@ local function highlightPlayer(player, toggle)
     end
 end
 
-local function changeHighlightColors(color)
+function changeHighlightColors(color)
     currentEspColor = color
 
     if #highlights == 0 then return end
@@ -196,41 +223,9 @@ for i,player in ipairs(game.Players:GetChildren()) do
                 v.Adornee = character
             end
         end
-
-         -- Check to see if the game's highlight exists cause, it overwrites ours
-        character.DescendantAdded:Connect(function(inst)
-            if inst.Name == "Highlight" then
-                print("Highlight Found!")
-                inst:Destroy()
-            end
-        end)
-
-        for i,v in ipairs(character:GetChildren()) do
-            if v.Name == "Highlight" then
-                print("Highlight Found!")
-                v:Destroy()
-                break
-            end
-        end
     end)
 
     print("Character Added Check Done")
-
-    -- Check to see if the game's highlight exists again cause, it overwrites ours.
-    player.Character.DescendantAdded:Connect(function(inst)
-        if inst.Name == "Highlight" then
-            print("Highlight Found!")
-            inst:Destroy()
-        end
-    end)
-
-    for i,v in ipairs(player.Character:GetChildren()) do
-        if v.Name == "Highlight" then
-            print("Highlight Found!")
-            v:Destroy()
-            break
-        end
-    end
 end
 
 game.Players.PlayerAdded:Connect(function(player)
@@ -248,40 +243,9 @@ game.Players.PlayerAdded:Connect(function(player)
             end
         end
 
-         -- Check to see if the game's highlight exists cause, it overwrites ours
-        character.DescendantAdded:Connect(function(inst)
-            if inst.Name == "Highlight" then
-                print("Highlight Found!")
-                inst:Destroy()
-            end
-        end)
-
-        for i,v in ipairs(character:GetChildren()) do
-            if v.Name == "Highlight" then
-                print("Highlight Found!")
-                v:Destroy()
-                break
-            end
-        end
     end)
 
     print("Character Added Check Done")
-
-    -- Check to see if the game's highlight exists again cause, it overwrites ours.
-    player.Character.DescendantAdded:Connect(function(inst)
-        if inst.Name == "Highlight" then
-            print("Highlight Found!")
-            inst:Destroy()
-        end
-    end)
-
-    for i,v in ipairs(player.Character:GetChildren()) do
-        if v.Name == "Highlight" then
-            print("Highlight Found!")
-            v:Destroy()
-            break
-        end
-    end
 end)
 
 local function esp(object, text, color)
