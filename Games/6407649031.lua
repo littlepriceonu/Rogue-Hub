@@ -146,10 +146,9 @@ spawn(function()
 
             local char = plr.Character
             for _,v in ipairs(char:GetChildren()) do
-                if typeof(v) == "Instance" and v.ClassName == "Highlight" and v.Adornee ~= nil then
-                    print("Highlight Found. Is Adornee nil?:", v.Adornee ~= nil ,", Adornee:", v.Adornee, ", Changing to nil and disabling...")
-                    v.Adornee = nil
-                    v.Enabled = false
+                if v.Name == "Highlight" then
+                    print("Has a Child Called Highlight.")
+                    v:Destroy()
                     for _, h in ipairs(game.Workspace:GetChildren()) do
                         if h.ClassName == "Highlight" and h.Name == char.Name then
                             print("Found Our Highlight. Enabling and making Adornee character...")
@@ -158,7 +157,6 @@ spawn(function()
                             break
                         end
                     end
-                    break
                 end
             end
         end
@@ -229,8 +227,9 @@ for i,player in ipairs(game.Players:GetChildren()) do
 end
 
 game.Players.PlayerAdded:Connect(function(player)
-    if not player or not player.Character then return end
     print("Player Added Name:", player.Name)
+
+    repeat wait() until player.Character
 
     highlightPlayer(player, getgenv().settings.playerESP or false)
 
