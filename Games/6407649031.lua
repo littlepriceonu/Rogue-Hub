@@ -26,7 +26,7 @@ if getgc then
         end
     end
     
-    local function ModifyGuns(Mod, value)
+    function ModifyGuns(Mod, value)
         for i,v in ipairs(Guns) do
             v[Mod] = value
         end
