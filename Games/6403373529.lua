@@ -290,7 +290,7 @@ localPlr:GetMouse().Button1Down:Connect(function()
         localPlr.Character.HumanoidRootPart.CFrame = localPlr:GetMouse().Hit + Vector3.new(0,7,0)
         
         isTping = true
-        wait(0.3)
+        wait(0.6)
         isTping = false
     end
 end)
