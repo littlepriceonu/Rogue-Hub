@@ -11,9 +11,7 @@ if syn then
 end
 
 if game.PlaceId == 9431156611 then
-    workspace.Map.OriginOffice:WaitForChild("Antiaccess")
-    
-    workspace.Map.OriginOffice.Antiaccess:Destroy()
+	workspace:WaitForChild("Map"):WaitForChild("OriginOffice"):WaitForChild("Antiaccess"):Destroy()
     
 	local part = Instance.new("Part", workspace)
 
@@ -286,7 +284,7 @@ end)
 
 -- credits to infinite yield for this
 localPlr:GetMouse().Button1Down:Connect(function()
-    if localPlr.Character ~= nil and localPlr.Character:FindFirstChild("HumanoidRootPart") ~= nil and getgenv().settings.tpClick and not getgenv().settings.candyFarm and not getgenv().slapFarm then
+    if localPlr.Character ~= nil and localPlr.Character:FindFirstChild("HumanoidRootPart") ~= nil and getgenv().settings.tpClick and not getgenv().settings.candyFarm and not getgenv().slapFarm and not isTping then
         localPlr.Character.HumanoidRootPart.CFrame = localPlr:GetMouse().Hit + Vector3.new(0,7,0)
         
         isTping = true
