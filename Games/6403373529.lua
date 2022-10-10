@@ -11,6 +11,8 @@ if syn then
 end
 
 if game.PlaceId == 9431156611 then
+    workspace.Map.OriginOffice:WaitForChild("Antiaccess")
+    
     workspace.Map.OriginOffice.Antiaccess:Destroy()
     
 	local part = Instance.new("Part", workspace)
