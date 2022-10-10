@@ -50,11 +50,11 @@ else
 	arenaVoid.Transparency = 1
 end
 
--- local teleportFunc = queueonteleport or queue_on_teleport or syn and syn.queue_on_teleport
+local teleportFunc = queueonteleport or queue_on_teleport or syn and syn.queue_on_teleport
 
--- if teleportFunc then
---     teleportFunc([[loadstring(game:HttpGet("https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Main.lua", true))()]])
--- end
+if teleportFunc then
+    teleportFunc([[loadstring(game:HttpGet("https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Main.lua", true))()]])
+end
 
 -- walkspeed anticheat bypass
 if game.PlaceId == 9431156611 and getrawmetatable and hookmetamethod then
@@ -553,8 +553,6 @@ if game.PlaceId == 9431156611 then
             workspace.Lobby.Floor.CanCollide = false
             workspace.Lobby.FloorFraming.CanCollide = false
             
-            localPlr.Character.inMatch.Value = true
-            
             wait(0.5)
             
             workspace.Lobby.Floor.CanCollide = true
@@ -726,7 +724,7 @@ gloveSec:CreateToggle("Glove Extender", getgenv().settings.gloveExtend or false,
     saveSettings()
 end)
 
-local extendDrop = gloveSec:CreateDropdown("Extender Type", {"Meat Stick","Pancake", "Growth", "Slight Growth"}, function(option)
+local extendDrop = gloveSec:CreateDropdown("Extender Type", {"Meat Stick","Pancake", "Growth", "Slight Extend"}, function(option)
 	getgenv().settings.extendOption = option
 	saveSettings()
 end)
@@ -994,7 +992,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         elseif getgenv().settings.gloveExtend and getgenv().settings.extendOption == "Growth" and getTool():FindFirstChild("Glove").Size ~= Vector3.new(25, 25, 25) then
             getTool().Glove.Transparency = 0.5
             getTool().Glove.Size = Vector3.new(25, 25, 25)
-        elseif getgenv().settings.gloveExtend and getgenv().settings.extendOption == "Slight Growth" and getTool():FindFirstChild("Glove").Size ~= Vector3.new(0, 3.5, 2) then
+        elseif getgenv().settings.gloveExtend and getgenv().settings.extendOption == "Slight Extend" and getTool():FindFirstChild("Glove").Size ~= Vector3.new(0, 3.5, 2) then
             getTool().Glove.Transparency = 0
             getTool().Glove.Size = Vector3.new(3, 3, 3.7)
         elseif getgenv().settings.gloveExtend == false then
