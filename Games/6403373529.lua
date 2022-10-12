@@ -402,6 +402,12 @@ if game.PlaceId ~= 9431156611 then
             return
         end
         
+        if getgenv().settings.invis and isLoaded and localPlr.Character:FindFirstChild("entered") ~= nil then
+            localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+            
+            repeat wait() until localPlr.Character ~= nil and localPlr.Character:WaitForChild("HumanoidRootPart") and localPlr.Character:FindFirstChild("entered") == nil
+        end
+        
         if getgenv().settings.invis then
             if localPlr.leaderstats.Slaps.Value >= 666 and localPlr.leaderstats.Glove.Value ~= "Ghost" then
                 fireclickdetector(workspace.Lobby.Ghosthand.ClickDetector)
