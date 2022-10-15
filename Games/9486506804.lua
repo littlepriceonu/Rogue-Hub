@@ -79,10 +79,3 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
 })
 
 sound:Destroy()
-task.wait(5)
-
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Spooky Hub Fact",
-    Text = "Spooky hub is currently at over 1000 lines of code. Thats over ",
-    Duration = 10
-})
