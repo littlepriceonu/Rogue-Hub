@@ -72,6 +72,120 @@ playerSec:CreateSlider("Walk Speed", 16,300,getgenv().settings.walkSpeedVal or 1
     localPlr.Character.Humanoid.WalkSpeed = getgenv().settings.walkSpeedVal
 end)
 
+-- Info
+
+local infoTab = window:CreateTab("Extra")
+local uiSec = infoTab:CreateSection("UI Settings")
+
+local uiColor = uiSec:CreateColorpicker("UI Color", function(color)
+	window:ChangeColor(color)
+end)
+
+uiColor:UpdateColor(Config.Color)
+
+local uiTog = uiSec:CreateToggle("UI Toggle", nil, function(bool)
+	window:Toggle(bool)
+end)
+
+uiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
+	if key == "Escape" or key == "Backspace" then key = "NONE" end
+	
+    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key] end
+end)
+
+uiTog:SetState(true)
+
+local uiRainbow = uiSec:CreateToggle("Rainbow UI", false, function(bool)
+	getgenv().rainbowUI = bool
+    
+    while getgenv().rainbowUI and task.wait() do
+        local hue = tick() % 10 / 10
+        local rainbow = Color3.fromHSV(hue, 1, 1)
+            
+        window:ChangeColor(rainbow)
+        uiColor:UpdateColor(rainbow)
+    end
+end)
+
+local infoSec = infoTab:CreateSection("Credits")
+
+local req = http_request or request or syn.request
+
+-- I ALSO KILLED KYRON ON MY BIRTHDAY - FROM KITZOON
+infoSec:CreateLabel("🍑 MY UNCLE DID A PUMPKIN IN BED 🍑")
+
+infoSec:CreateButton("Devil of Spooky Hub: Kitzoon#7750", function()
+    setclipboard("Kitzoon#7750")
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Spooky Hub Note",
+        Text = "Copied Kitzoon's discord username and tag to your clipboard.",
+        Duration = 5
+    })
+end)
+
+infoSec:CreateButton("Blood sucking helper: Kyron#6083", function()
+    setclipboard("Kyron#6083")
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Script Notification",
+        Text = "Copied Kyron's discord username and tag to your clipboard.",
+        Duration = 5
+    })
+end)
+
+infoSec:CreateButton("Consider donating on PayPal!", function()
+    setclipboard("https://paypal.me/RogueHub")
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Spooky Hub Note",
+        Text = "Copied our PayPal donate page to your clipboard, donate any amount to it!",
+        Duration = 5
+    })
+end)
+
+infoSec:CreateButton("Consider donating on Bitcoin!", function()
+    setclipboard("bc1qnrajmhe83hreyjm9uzrq0ytvu2mg6w2nknl2vy")
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Spooky Hub Note",
+        Text = "Copied our Bitcoin address to your clipboard, donate any amount to it!",
+        Duration = 5
+    })
+end)
+
+infoSec:CreateButton("Join us on discord!", function()
+	if req then
+        req({
+            Url = "http://127.0.0.1:6463/rpc?v=1",
+            Method = "POST",
+            
+            Headers = {
+                ["Content-Type"] = "application/json",
+                ["origin"] = "https://discord.com",
+            },
+                    
+            Body = game:GetService("HttpService"):JSONEncode(
+            {
+                ["args"] = {
+                ["code"] = "VdrHU8KP7c",
+                },
+                        
+                ["cmd"] = "INVITE_BROWSER",
+                ["nonce"] = "."
+            })
+        })
+    else
+        setclipboard("https://discord.gg/VdrHU8KP7c")
+    
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Spooky Hub Note",
+            Text = "Copied our discord server to your clipboard.",
+            Duration = 5
+        })
+    end
+end)
+
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "Spooky Hub Message",
     Text = "Happy Halloween!",
