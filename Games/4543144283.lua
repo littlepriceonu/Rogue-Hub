@@ -22,7 +22,6 @@ getgenv().settings = {
     upgradeFarm = false,
     coinFarm = false,
     bombLoop = false,
-    upgradeFarm = false,
     killAura = false,
     walkValue = 50,
     jumpValue = 50

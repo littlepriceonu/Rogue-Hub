@@ -161,7 +161,7 @@ local function getTool()
     local tool = localPlr.Character:FindFirstChildOfClass("Tool") or localPlr:WaitForChild("Backpack"):FindFirstChildOfClass("Tool")
     
     if tool ~= nil and tool:FindFirstChild("Glove") ~= nil then
-        return tool    
+        return tool
     end
 end
 
@@ -177,7 +177,7 @@ localPlr.CharacterAdded:Connect(function()
     if getgenv().settings.jumpPowerTog then
         humanoid.JumpPower = getgenv().settings.jumpPower or 50
     else
-        humanoid.JumpPower = 50    
+        humanoid.JumpPower = 50
     end
     
     if getgenv().settings.invis and localPlr.leaderstats.Slaps.Value >= 666 then
