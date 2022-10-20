@@ -1123,7 +1123,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             end
         end
 
-        if getgenv().settings.autoClicker and not getgenv().slapFarm then
+        if task.wait(2) and getgenv().settings.autoClicker and not getgenv().slapFarm and getgenv().settings.auraSlap then
             getTool():Activate()
         end
         
@@ -1177,7 +1177,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             game:GetService("ReplicatedStorage").Fart:FireServer()
         end
         
-        if getgenv().settings.spin and localPlr:GetMouse().Icon ~= "rbxasset://textures/MouseLockedCursor.png" and not getgenv().slapFarm then
+        if getgenv().settings.spin and localPlr:GetMouse().Icon ~= "rbxasset://textures/MouseLockedCursor.png" and not getgenv().slapFarm and not getgenv().settings.candyFarm then
             localPlr.Character.HumanoidRootPart.CFrame = localPlr.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(getgenv().settings.spinSpeed), 0)
         end
     end
