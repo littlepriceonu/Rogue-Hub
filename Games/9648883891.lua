@@ -9,10 +9,16 @@ sound.Volume = 0.5
 
 local localPlr = game:GetService("Players").LocalPlayer
 
+local ourColor = Color = Color3.fromRGB(153, 148, 148)
+
+function CheckConfigFile()
+    if not isfile("/Rogue Hub/Configs/Keybind.ROGUEHUB") then return Enum.KeyCode.RightControl else return Enum.KeyCode[game:GetService("HttpService"):JSONDecode(readfile("/Rogue Hub/Configs/Keybind.ROGUEHUB"))["Key"]] or Enum.KeyCode.RightControl
+end
+
 local Config = {
     WindowName = "Rogue Hub | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
-    Color = Color3.fromRGB(153, 148, 148),
-    Keybind = Enum.KeyCode.RightControl
+    Color = ourColor,
+    Keybind = CheckConfigFile()
 }
 
 getgenv().settings = {
@@ -46,11 +52,21 @@ end
 
 local function espCreate(object, guiText, guiColor)
     local billboard = Instance.new("BillboardGui", object)
+    billboard.Name = game:GetService("HttpService"):GenerateGUID(false)
     billboard.Adornee = object
     billboard.AlwaysOnTop = true
     billboard.Size = UDim2.new(0,6,0,6)
+
+    local high = Instance.new("Highlight", object)
+    high.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    high.Adornee = object
+    high.Name = game:GetService("HttpService"):GenerateGUID(false)
+    high.FillColor = Color3.fromRGB(255,0,0)
+    high.OutlineColor = high.FillColor
+    high.FillTransparency = 0.4
     
     local text = Instance.new("TextLabel", billboard)
+    text.Name = game:GetService("HttpService"):GenerateGUID(false)
     text.Text = guiText
     text.Font = "Ubuntu"
     text.TextStrokeTransparency = 0
@@ -62,11 +78,11 @@ local function espCreate(object, guiText, guiColor)
     
     game:GetService("RunService").RenderStepped:Connect(function()
         if text ~= nil then
-            local distance = math.floor((object.Position - localPlr.Character.HumanoidRootPart.Position).magnitude)
             text.TextSize = getgenv().settings.textSize or 16
             
             if getgenv().settings.showDistance then
-                text.Text = "ATM Machine | " .. distance .. " meters away"
+                local distance = math.floor((object.Position - localPlr.Character.HumanoidRootPart.Position).magnitude)
+                text.Text = "ATM Machine | " .. distance .. " studs away"
             else
                 text.Text = "ATM Machine"
             end
@@ -224,7 +240,7 @@ end)
 uiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
 	if key == "Escape" or key == "Backspace" then key = "NONE" end
 	
-    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key] end
+    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key]; writefile("/Rogue Hub/Configs/Keybind.ROGUEHUB", game:GetService("HttpService"):JSONEncode({Key = key})) end
 end)
 
 uiTog:SetState(true)

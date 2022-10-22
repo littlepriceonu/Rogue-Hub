@@ -53,10 +53,16 @@ sound.SoundId = "rbxassetid://1548304764"
 sound.PlayOnRemove = true
 sound.Volume = 0.5
 
+local ourColor = Color3.fromRGB(153, 148, 148)
+
+function CheckConfigFile()
+    if not isfile("/Rogue Hub/Configs/Keybind.ROGUEHUB") then return Enum.KeyCode.RightControl else return Enum.KeyCode[game:GetService("HttpService"):JSONDecode(readfile("/Rogue Hub/Configs/Keybind.ROGUEHUB"))["Key"]] or Enum.KeyCode.RightControl
+end
+
 local Config = {
     WindowName = "Rogue Hub | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
-    Color = Color3.fromRGB(153, 148, 148),
-    Keybind = Enum.KeyCode.RightControl
+    Color = ourColor,
+    Keybind = CheckConfigFile()
 }
 
 local localPlr = game:GetService("Players").LocalPlayer
@@ -535,10 +541,10 @@ local uiTog = uiSec:CreateToggle("UI Toggle", nil, function(bool)
 	window:Toggle(bool)
 end)
 
-uiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
+uuiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
 	if key == "Escape" or key == "Backspace" then key = "NONE" end
 	
-    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key] end
+    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key]; writefile("/Rogue Hub/Configs/Keybind.ROGUEHUB", game:GetService("HttpService"):JSONEncode({Key = key})) end
 end)
 
 uiTog:SetState(true)
