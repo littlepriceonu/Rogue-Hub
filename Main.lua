@@ -38,8 +38,9 @@ if response.Body ~= "404: Not Found" then
         wait(1)
         game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 2, false, nil, 0)
     end)
-    
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Games/" .. game.PlaceId .. ".lua", true))()
+
+    -- If its not 404 why make another HTTP request?
+    loadstring(response.Body, true)()
 else
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "Rogue Hub Error",

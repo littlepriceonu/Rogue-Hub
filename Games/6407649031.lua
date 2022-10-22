@@ -14,7 +14,7 @@ if getgenv().Rogue_AlreadyLoaded ~= nil then error("Rogue Hub was already found 
 
 if game.PlaceId ~= 6407649031 then return end
 
---#region Proformance Functions.
+--#region Performance Functions.
 
 if getgc then
     local Guns = {}

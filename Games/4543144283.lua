@@ -377,17 +377,25 @@ game:GetService("RunService").RenderStepped:Connect(function()
         func()
     end
     
-    if getgenv().settings.upgradeFarm and task.wait(3) then
-        game:GetService("ReplicatedStorage").Remotes.Buy:FireServer("Weight " .. localPlr.Stats.UpgradesBought.Value, "Damage")
+    if getgenv().settings.upgradeFarm then
+        task.spawn(function()
+            task.wait(3)
+
+            game:GetService("ReplicatedStorage").Remotes.Buy:FireServer("Weight " .. localPlr.Stats.UpgradesBought.Value, "Damage")
+        end)
     end
     
-    if getgenv().settings.coinFarm and task.wait(5) then
-        for _, coin in next, game:GetService("Workspace").CoinStuff:GetDescendants() do
-            if coin.Name == "CoinCollectible" and coin:IsA("MeshPart") then
-                firetouchinterest(localPlr.Character:WaitForChild("HumanoidRootPart"), coin, 0)
-                firetouchinterest(localPlr.Character:WaitForChild("HumanoidRootPart"), coin, 1)
+    if getgenv().settings.coinFarm then
+        task.spawn(function()
+            task.wait(5)
+
+            for _, coin in next, game:GetService("Workspace").CoinStuff:GetDescendants() do
+                if coin.Name == "CoinCollectible" and coin:IsA("MeshPart") then
+                    firetouchinterest(localPlr.Character:WaitForChild("HumanoidRootPart"), coin, 0)
+                    firetouchinterest(localPlr.Character:WaitForChild("HumanoidRootPart"), coin, 1)
+                end
             end
-        end
+        end)
     end
 end)
 
