@@ -53,11 +53,11 @@ else
 	arenaVoid.Transparency = 1
 end
 
--- local teleportFunc = queueonteleport or queue_on_teleport or syn and syn.queue_on_teleport
+local teleportFunc = queueonteleport or queue_on_teleport or syn and syn.queue_on_teleport
 
--- if teleportFunc then
---     teleportFunc([[loadstring(game:HttpGet("https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Main.lua", true))()]])
--- end
+if teleportFunc then
+    teleportFunc([[loadstring(game:HttpGet("https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Main.lua", true))()]])
+end
 
 -- walkspeed anticheat bypass
 if game.PlaceId == 9431156611 and getrawmetatable and hookmetamethod then
@@ -90,7 +90,7 @@ sound.PlayOnRemove = true
 sound.Volume = 0.5
 
 local Config = {
-    WindowName = "Spooky Hub Private | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name or "Slap Battles",
+    WindowName = "Spooky Hub | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name or "Slap Battles",
     Color = Color3.fromRGB(242, 125, 20),
     Keybind = Enum.KeyCode.RightControl
 }
