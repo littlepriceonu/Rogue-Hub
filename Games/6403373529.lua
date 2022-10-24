@@ -53,11 +53,11 @@ else
 	arenaVoid.Transparency = 1
 end
 
-local teleportFunc = queueonteleport or queue_on_teleport or syn and syn.queue_on_teleport
+-- local teleportFunc = queueonteleport or queue_on_teleport or syn and syn.queue_on_teleport
 
-if teleportFunc then
-    teleportFunc([[loadstring(game:HttpGet("https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Main.lua", true))()]])
-end
+-- if teleportFunc then
+--     teleportFunc([[loadstring(game:HttpGet("https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Main.lua", true))()]])
+-- end
 
 -- walkspeed anticheat bypass
 if game.PlaceId == 9431156611 and getrawmetatable and hookmetamethod then
@@ -90,7 +90,7 @@ sound.PlayOnRemove = true
 sound.Volume = 0.5
 
 local Config = {
-    WindowName = "Spooky Hub | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name or "Slap Battles",
+    WindowName = "Spooky Hub Private | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name or "Slap Battles",
     Color = Color3.fromRGB(242, 125, 20),
     Keybind = Enum.KeyCode.RightControl
 }
@@ -266,31 +266,17 @@ if game.PlaceId ~= 9431156611 and game.PrivateServerId == "" then
     local corn = playerSec:CreateToggle("Candy Corns Farm", false, function(bool)
         getgenv().settings.candyFarm = bool
         
-        if getgenv().settings.candyFarm and isLoaded and localPlr.Character:FindFirstChild("entered") ~= nil then
-            localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
-            
-            repeat wait() until localPlr.Character ~= nil and localPlr.Character:WaitForChild("HumanoidRootPart") and localPlr.Character:FindFirstChild("entered") == nil
-            
-            task.wait(0.5)
-        end
-        
         if setfpscap and getgenv().settings.candyFarm then
             setfpscap(50)
         elseif setfpscap and not getgenv().settings.candyFarm then
             setfpscap(500)
         end
         
-        if getgenv().settings.candyFarm and workspace.dedBarrier.CanCollide then
-            workspace.dedBarrier.CanCollide = false
-        else
-            workspace.dedBarrier.CanCollide = true
-        end
-        
-        while isLoaded and getgenv().settings.candyFarm and not getgenv().slapFarm and not getgenv().settings.invis and localPlr.Character:FindFirstChild("entered") == nil and wait() do
+        while isLoaded and getgenv().settings.candyFarm and not getgenv().slapFarm and not getgenv().settings.invis and wait() do
             for _, corn in pairs(workspace.CandyCorns:GetChildren()) do
                 if getgenv().settings.candyFarm and corn:FindFirstChild("TouchInterest") ~= nil then
                     localPlr.Character.HumanoidRootPart.CFrame = corn.CFrame * CFrame.new(0,0,3)
-                    task.wait(0.3)
+                    task.wait(0.1)
                     localPlr.Character.HumanoidRootPart.CFrame = corn.CFrame
                     task.wait(0.2)
                 end
@@ -491,14 +477,11 @@ if game.PlaceId ~= 9431156611 then
     playerSec:CreateToggle("Anti Void", getgenv().settings.noVoid or false, function(bool)
         getgenv().settings.noVoid = bool
         
-        workspace.dedBarrier.CanCollide = getgenv().settings.noVoid
-        workspace.arenaVoid.CanCollide = getgenv().settings.noVoid
+        workspace.dedBarrier.CanCollide = getgenv().settings.noVoid or false
+        workspace.arenaVoid.CanCollide = getgenv().settings.noVoid or false
         
         saveSettings()
     end)
-    
-    workspace.dedBarrier.CanCollide = getgenv().settings.noVoid or false
-    workspace.arenaVoid.CanCollide = getgenv().settings.noVoid or false
 end
 
 if game.PlaceId == 9431156611 then
@@ -711,32 +694,32 @@ local farmTog = gloveSec:CreateToggle(name, false, function(bool)
         end
     end
     
-    while task.wait() and getgenv().slapFarm do
+    while wait() and getgenv().slapFarm do
         if game.PlaceId ~= 9431156611 then
             for _, target in next, game:GetService("Players"):GetPlayers() do
                 if target ~= localPlr and target.Character ~= nil and target.Character:FindFirstChild("entered") ~= nil and localPlr.Character:FindFirstChild("entered") ~= nil and target.Character:FindFirstChild("rock") == nil and target.Character:FindFirstChild("Ragdolled").Value == false and target.Character:FindFirstChild("Reversed") == nil and target.Character:FindFirstChild("Right Arm") and target.Character:FindFirstChild("Error") == nil and target.Character:FindFirstChild("Orbit") == nil and target.Character:FindFirstChild("Spectator") == nil and target.Backpack:FindFirstChild("Spectator") == nil and getgenv().slapFarm then                        
-                    if getTool() ~= nil and getTool().Name == "Default" and getgenv().slapFarm then
-                        localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,15,0)
-                        task.wait(0.3)
-                        game:GetService("ReplicatedStorage").b:FireServer(target.Character.HumanoidRootPart)
-                    elseif getTool() ~= nil and getTool().Name == "Bull" and getgenv().slapFarm then
-                        localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,15,0)
-                        task.wait(0.3)
-                        game:GetService("ReplicatedStorage").BullHit:FireServer(target.Character.HumanoidRootPart)
-                    elseif getTool() ~= nil and getTool().Name == "Ghost" and getgenv().slapFarm then
-                        localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,15,0)
-                        task.wait(0.3)
-                        game:GetService("ReplicatedStorage").GhostHit:FireServer(target.Character.HumanoidRootPart)
-                    elseif getTool() ~= nil and getTool().Name ~= "Default" and getgenv().slapFarm then
-                        pcall(function()
+                    pcall(function()
+                        if getTool() ~= nil and getTool().Name == "Default" and getgenv().slapFarm then
+                            localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,8,0)
+                            task.wait(0.25)
+                            game:GetService("ReplicatedStorage").b:FireServer(target.Character.HumanoidRootPart)
+                        elseif getTool() ~= nil and getTool().Name == "Bull" and getgenv().slapFarm then
+                            localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,8,0)
+                            task.wait(0.2)
+                            game:GetService("ReplicatedStorage").BullHit:FireServer(target.Character.HumanoidRootPart)
+                        elseif getTool() ~= nil and getTool().Name == "Ghost" and getgenv().slapFarm then
+                            localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,8,0)
+                            task.wait(0.2)
+                            game:GetService("ReplicatedStorage").GhostHit:FireServer(target.Character.HumanoidRootPart)
+                        elseif getTool() ~= nil and getTool().Name ~= "Default" and getgenv().slapFarm then
                             repeat task.wait()
                                 localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,3.5)
                                 getTool():Activate()
                             until target.Character == nil or localPlr.Character == nil or target.Character:FindFirstChild("Ragdolled").Value == true
-                        end)
-                    end
+                        end
+                    end)
                     
-                    task.wait(0.3)
+                    task.wait(0.35)
                 end
             end
         else
@@ -758,6 +741,12 @@ local farmTog = gloveSec:CreateToggle(name, false, function(bool)
                                     gotLava = true
                                 end
                             end)
+                            
+                            localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.StrafingNoPhysics)
+                            localPlr.Character.inMatch.Value = false
+                            
+                            game:GetService("TweenService"):Create(localPlr.Character.HumanoidRootPart, TweenInfo.new(1, Enum.EasingStyle.Cubic), { CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,6.3,0)}):Play()
+                            task.wait(1)
                             
                             repeat task.wait()
                                 localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.StrafingNoPhysics)
@@ -806,12 +795,12 @@ equip:AddToolTip("Automatically equips when you left click and your glove is not
     
 localPlr:GetMouse().Button1Down:Connect(function()
     if game.PlaceId ~= 9431156611 then
-        if getgenv().settings.autoEquip and localPlr.Character:FindFirstChild("entered") ~= nil and getBackpackTool() then
+        if getgenv().settings.autoEquip and not getgenv().slapFarm and localPlr.Character:FindFirstChild("entered") ~= nil and getBackpackTool() ~= nil then
             localPlr.Character.Humanoid:EquipTool(getBackpackTool())
             getTool():Activate()
         end
     else
-        if getgenv().settings.autoEquip and localPlr.Character:FindFirstChild("inMatch").Value and getBackpackTool() then
+        if getgenv().settings.autoEquip and not getgenv().slapFarm and localPlr.Character:FindFirstChild("inMatch").Value and getBackpackTool() ~= nil then
             localPlr.Character.Humanoid:EquipTool(getBackpackTool())
             getTool():Activate()
         end
@@ -1123,7 +1112,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             end
         end
 
-        if task.wait(2) and getgenv().settings.autoClicker and not getgenv().slapFarm and getgenv().settings.auraSlap then
+        if task.wait(2) and getgenv().settings.autoClicker and not getgenv().slapFarm then
             getTool():Activate()
         end
         
