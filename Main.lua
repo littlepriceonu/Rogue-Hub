@@ -37,7 +37,7 @@ local response = req({
 })
 
 if response.Body ~= "404: Not Found" then
-    
+
     -- Anti AFK
     game:GetService("Players").LocalPlayer.Idled:Connect(function()
         game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 2, true, nil, 0)
@@ -46,8 +46,9 @@ if response.Body ~= "404: Not Found" then
     end)
 
     -- If its not 404 why make another HTTP request?
-    loadstring(response.Body, true)()
+    loadstring(response.Body)()
 else
+    
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "Rogue Hub Error",
         Text = "The game you are trying to play is not supported with Rogue Hub!",

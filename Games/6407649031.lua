@@ -1,5 +1,9 @@
 -- anticheat bypass, ty WhoIsE (staff manager at the krnl discord server) for this
 
+loadstring(game:HttpGet("https://api.irisapp.ca/Scripts/IrisInstanceProtect.lua"))()
+-- This loadstring lets me (little) use ProtectInstance(<instance>) to make it so a game cant see that its actually there. (its in the genv btw)
+-- Docs for it: https://api.irisapp.ca/Scripts/docs/IrisProtectInstance/
+
 if getconnections then
     for _, connection in pairs(getconnections(game:GetService("LogService").MessageOut)) do
         connection:Disable()
@@ -136,13 +140,14 @@ end
 
 -- NO MIKEY ALLOWED THAT RETARDS A FUCKING SKID (also if you see this then cool you found the second easter egg)
 
--- Esp Stuff (I'm not gonna write an anti-anti cheat thing for this rn. If the devs do add something I'll just make it then)
--- Todo: Fix Game Overridding Our Highlight.
 
+-- Esp Stuff (Its 12 in the morning I want to die)
 local highlights = {}
 local currentEspColor = getgenv().settings.espColor or Color3.new(1,0,0)
 
 ---- Check to see if the game's highlight exists again cause it overwrites ours.
+-- IGNORE THIS GARBLE FUCK OF CODE
+-- ALL of it is because of how shit roblox highlights are
 spawn(function()
     while wait() do
         for _, plr in ipairs(game.Players:GetChildren()) do
@@ -151,10 +156,9 @@ spawn(function()
             local char = plr.Character
             for _,v in ipairs(char:GetChildren()) do
                 if v.Name == "Highlight" then
-                    print(plr.Name, "Has a Child Called Highlight.")
                     v.Adornee = nil
                     v:Destroy()
-                    for _, h in ipairs(game.Workspace:GetChildren()) do
+                    for _, h in ipairs(highlights) do
                         if h.ClassName == "Highlight" and h.Name == char.Name then
                             h.Adornee = nil
                             h.Adornee = char
@@ -168,8 +172,13 @@ spawn(function()
     end
 end)
 
+-- Adds a highlight to the charactter
 function highlightCharacter(Character)
     local high = Instance.new("Highlight", game.Workspace)
+
+    -- Anti Cheat Devs cant see the highlight 😲
+    ProtectInstance(high)
+
     high.Name = Character.Name
     high.Adornee = Character
     high.Enabled = getgenv().settings.playerESP or false
@@ -182,7 +191,7 @@ function highlightCharacter(Character)
     return high
 end
 
--- Player is the Player object, not the character, !If player is nil will toggle all highlights
+-- Player is the Player object, not the character, !WARNING! If player is nil will toggle all highlights
 function highlightPlayer(player, toggle)
     if (typeof(player) == "Instance" and player.ClassName == "Player") and (player.Character == nil) then return end
     if toggle then
@@ -202,6 +211,7 @@ function highlightPlayer(player, toggle)
     end
 end
 
+-- Changes the color of all the highlights to the *color* argument (duh).
 function changeHighlightColors(color)
     currentEspColor = color
 
@@ -212,13 +222,12 @@ function changeHighlightColors(color)
     end
 end
 
+-- Loop through all the players already in the game.
 for i,player in ipairs(game.Players:GetChildren()) do
     if not player or not player.Character then return end
-    print("Player Added Name:", player.Name)
 
     highlightPlayer(player, getgenv().settings.playerESP or false)
 
-    print("Highlight Added")
 
     player.CharacterAdded:Connect(function(character)
         for i,v in ipairs(highlights) do
@@ -227,19 +236,26 @@ for i,player in ipairs(game.Players:GetChildren()) do
             end
         end
     end)
-
-    print("Character Added Check Done")
 end
 
+-- Remove unneeded highlights (cause roblox engine hates highlights for some reason).
+game.Players.PlayerRemoving:Connect(function(player)
+    for i,v in ipairs(highlights) do
+        if v:IsA("Highlight") and v.Name == player.Name then
+            table.remove(highlights, table.find(highlights, v))
+            v:Destroy()
+        end
+    end
+end)
+
+-- For when a player joins, 
 game.Players.PlayerAdded:Connect(function(player)
-    print("Player Added Name:", player.Name)
 
     repeat wait() until player.Character
 
     highlightPlayer(player, getgenv().settings.playerESP or false)
 
-    print("Highlight Added")
-
+    -- player died and respawned, Make that character highlighted
     player.CharacterAdded:Connect(function(character)
         for i,v in ipairs(highlights) do
             if v.Name == character.Name then
@@ -249,7 +265,6 @@ game.Players.PlayerAdded:Connect(function(player)
 
     end)
 
-    print("Character Added Check Done")
 end)
 
 local function esp(object, text, color)
@@ -675,8 +690,6 @@ uiColor:UpdateColor(Config.Color)
 local uiTog = uiSec:CreateToggle("UI Toggle", nil, function(bool)
 	window:Toggle(bool)
 end)
-
-print(uiTog)
 
 uiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
 	if key == "Escape" or key == "Backspace" then key = "NONE" end

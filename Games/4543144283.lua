@@ -45,6 +45,10 @@ if getgc then
         elseif type(v) == "function" and not exploitFunction(v) and getinfo(v).name == "attack" then
             attackFunc = v
         end
+
+        if func and attackFunc then
+            break
+        end
     end
 end
 
