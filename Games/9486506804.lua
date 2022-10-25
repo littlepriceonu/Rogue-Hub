@@ -13,10 +13,16 @@ sound.SoundId = "rbxassetid://1548304764"
 sound.PlayOnRemove = true
 sound.Volume = 0.5
 
+local ourColor = Color3.fromRGB(242, 125, 20)
+
+function CheckConfigFile()
+    if not isfile("/Rogue Hub/Configs/Keybind.ROGUEHUB") then return Enum.KeyCode.RightControl else return Enum.KeyCode[game:GetService("HttpService"):JSONDecode(readfile("/Rogue Hub/Configs/Keybind.ROGUEHUB"))["Key"]] or Enum.KeyCode.RightControl end
+end
+
 local Config = {
-    WindowName = "Spooky Hub | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name or "FIFA World",
-    Color = Color3.fromRGB(242, 125, 20),
-    Keybind = Enum.KeyCode.RightControl
+    WindowName = "Rogue Hub | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+    Color = ourColor,
+    Keybind = CheckConfigFile()
 }
 
 getgenv().settings = {
