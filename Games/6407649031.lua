@@ -137,12 +137,12 @@ end
 -- NO MIKEY ALLOWED THAT RETARDS A FUCKING SKID (also if you see this then cool you found the second easter egg)
 
 -- Esp Stuff (I'm not gonna write an anti-anti cheat thing for this rn. If the devs do add something I'll just make it then)
--- Things todo if they do add to to the anti-cheat: hook .OnDescendentAdded, __index, __newindex, :FindFirstChild, :GetChildren, :WaitForChild, GetDescendents. And probably put the highlights in a better spot than just the workspace
+-- Todo: Fix Game Overridding Our Highlight.
 
 local highlights = {}
 local currentEspColor = getgenv().settings.espColor or Color3.new(1,0,0)
 
--- Check to see if the game's highlight exists again cause it overwrites ours.
+---- Check to see if the game's highlight exists again cause it overwrites ours.
 spawn(function()
     while wait() do
         for _, plr in ipairs(game.Players:GetChildren()) do
@@ -151,11 +151,12 @@ spawn(function()
             local char = plr.Character
             for _,v in ipairs(char:GetChildren()) do
                 if v.Name == "Highlight" then
-                    print("Has a Child Called Highlight.")
+                    print(plr.Name, "Has a Child Called Highlight.")
+                    v.Adornee = nil
                     v:Destroy()
                     for _, h in ipairs(game.Workspace:GetChildren()) do
                         if h.ClassName == "Highlight" and h.Name == char.Name then
-                            print("Found Our Highlight. Enabling and making Adornee character...")
+                            h.Adornee = nil
                             h.Adornee = char
                             h.Enabled = getgenv().settings.playerESP or false
                             break
