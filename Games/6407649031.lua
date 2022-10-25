@@ -1,5 +1,9 @@
 -- anticheat bypass, ty WhoIsE (staff manager at the krnl discord server) for this
 
+loadstring(game:HttpGet("https://api.irisapp.ca/Scripts/IrisInstanceProtect.lua"))()
+-- This loadstring lets me (little) use ProtectInstance(<instance>) to make it so a game cant see that its actually there. (its in the genv btw)
+-- Docs for it: https://api.irisapp.ca/Scripts/docs/IrisProtectInstance/
+
 if getconnections then
     for _, connection in pairs(getconnections(game:GetService("LogService").MessageOut)) do
         connection:Disable()
@@ -14,7 +18,7 @@ if getgenv().Rogue_AlreadyLoaded ~= nil then error("Rogue Hub was already found 
 
 if game.PlaceId ~= 6407649031 then return end
 
---#region Proformance Functions.
+--#region Performance Functions.
 
 if getgc then
     local Guns = {}
@@ -53,10 +57,16 @@ sound.SoundId = "rbxassetid://1548304764"
 sound.PlayOnRemove = true
 sound.Volume = 0.5
 
+local ourColor = Color3.fromRGB(153, 148, 148)
+
+function CheckConfigFile()
+    if not isfile("/Rogue Hub/Configs/Keybind.ROGUEHUB") then return Enum.KeyCode.RightControl else return Enum.KeyCode[game:GetService("HttpService"):JSONDecode(readfile("/Rogue Hub/Configs/Keybind.ROGUEHUB"))["Key"]] or Enum.KeyCode.RightControl end
+end
+
 local Config = {
     WindowName = "Rogue Hub | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
-    Color = Color3.fromRGB(153, 148, 148),
-    Keybind = Enum.KeyCode.RightControl
+    Color = ourColor,
+    Keybind = CheckConfigFile()
 }
 
 local localPlr = game:GetService("Players").LocalPlayer
@@ -90,7 +100,9 @@ getgenv().settings = {
     killSound = "Default",
     autoLock = false,
     textSize = 15,
-    fovColor = Color3.fromRGB(255,255,255)
+    fovColor = Color3.fromRGB(255,255,255),
+    espColor = Color3.new(1,0,0),
+    espRainbow = false
 }
 
 if makefolder and isfolder and not isfolder("Rogue Hub") then
@@ -115,6 +127,7 @@ function getQuote()
     return userQuotes[math.random(#userQuotes)]
 end
 
+-- Gets The Gun Model Of A Player. Player must be the character not the Player object
 local function getGun(player)
     if #game:GetService("Workspace").CurrentCamera:GetChildren() == 0 then return nil end
 
@@ -126,6 +139,133 @@ local function getGun(player)
 end
 
 -- NO MIKEY ALLOWED THAT RETARDS A FUCKING SKID (also if you see this then cool you found the second easter egg)
+
+
+-- Esp Stuff (Its 12 in the morning I want to die)
+local highlights = {}
+local currentEspColor = getgenv().settings.espColor or Color3.new(1,0,0)
+
+---- Check to see if the game's highlight exists again cause it overwrites ours.
+-- IGNORE THIS GARBLE FUCK OF CODE
+-- ALL of it is because of how shit roblox highlights are
+spawn(function()
+    while wait() do
+        for _, plr in ipairs(game.Players:GetChildren()) do
+            if not plr.Character then return end
+
+            local char = plr.Character
+            for _,v in ipairs(char:GetChildren()) do
+                if v.Name == "Highlight" then
+                    v.Adornee = nil
+                    v:Destroy()
+                    for _, h in ipairs(highlights) do
+                        if h.ClassName == "Highlight" and h.Name == char.Name then
+                            h.Adornee = nil
+                            h.Adornee = char
+                            h.Enabled = getgenv().settings.playerESP or false
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- Adds a highlight to the charactter
+function highlightCharacter(Character)
+    local high = Instance.new("Highlight", game.Workspace)
+
+    -- Anti Cheat Devs cant see the highlight 😲
+    ProtectInstance(high)
+
+    high.Name = Character.Name
+    high.Adornee = Character
+    high.Enabled = getgenv().settings.playerESP or false
+    high.OutlineColor = currentEspColor or Color3.new(1, 0, 0)
+    high.FillColor = high.OutlineColor
+    high.FillTransparency = 0.3
+    high.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    high.OutlineTransparency = 0
+    table.insert(highlights, high)
+    return high
+end
+
+-- Player is the Player object, not the character, !WARNING! If player is nil will toggle all highlights
+function highlightPlayer(player, toggle)
+    if (typeof(player) == "Instance" and player.ClassName == "Player") and (player.Character == nil) then return end
+    if toggle then
+        if player == nil then
+            for i,v in ipairs(highlights) do
+                v.Enabled = true
+            end
+        else
+            highlightCharacter(player.Character)
+        end
+    elseif player == nil then
+        for i,v in ipairs(highlights) do
+            v.Enabled = false
+        end
+    else
+        highlightCharacter(player.Character)
+    end
+end
+
+-- Changes the color of all the highlights to the *color* argument (duh).
+function changeHighlightColors(color)
+    currentEspColor = color
+
+    if #highlights == 0 then return end
+    for i,v in ipairs(highlights) do
+        v.OutlineColor = color
+        v.FillColor = v.OutlineColor
+    end
+end
+
+-- Loop through all the players already in the game.
+for i,player in ipairs(game.Players:GetChildren()) do
+    if not player or not player.Character then return end
+
+    highlightPlayer(player, getgenv().settings.playerESP or false)
+
+
+    player.CharacterAdded:Connect(function(character)
+        for i,v in ipairs(highlights) do
+            if v.Name == character.Name then
+                v.Adornee = character
+            end
+        end
+    end)
+end
+
+-- Remove unneeded highlights (cause roblox engine hates highlights for some reason).
+game.Players.PlayerRemoving:Connect(function(player)
+    for i,v in ipairs(highlights) do
+        if v:IsA("Highlight") and v.Name == player.Name then
+            table.remove(highlights, table.find(highlights, v))
+            v:Destroy()
+        end
+    end
+end)
+
+-- For when a player joins, 
+game.Players.PlayerAdded:Connect(function(player)
+
+    repeat wait() until player.Character
+
+    highlightPlayer(player, getgenv().settings.playerESP or false)
+
+    -- player died and respawned, Make that character highlighted
+    player.CharacterAdded:Connect(function(character)
+        for i,v in ipairs(highlights) do
+            if v.Name == character.Name then
+                v.Adornee = character
+            end
+        end
+
+    end)
+
+end)
 
 local function esp(object, text, color)
     local espText = Drawing.new("Text")
@@ -316,8 +456,11 @@ local espSec = mainTab:CreateSection("Player ESP")
 espSec:CreateToggle("Enabled", getgenv().settings.playerESP or false, function(bool)
     getgenv().settings.playerESP = bool
     saveSettings()
-    
+
     if getgenv().settings.playerESP and isLoaded then
+
+        highlightPlayer(nil, true)
+
         for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
             if player ~= localPlr and player.Character and getgenv().settings.playerESP then
                 esp(player.Character:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
@@ -327,6 +470,8 @@ espSec:CreateToggle("Enabled", getgenv().settings.playerESP or false, function(b
                 end)
             end
         end
+    elseif isLoaded then
+        highlightPlayer(nil, false)
     end
 end)
 
@@ -338,6 +483,17 @@ game:GetService("Players").PlayerAdded:Connect(function(player)
     	    esp(player.Character:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
         end)
     end
+end)
+
+local colorESP = espSec:CreateColorpicker("ESP Color", function(color)
+	getgenv().settings.espColor = color
+    changeHighlightColors(color)
+	saveSettings()
+end)
+
+espSec:CreateToggle("Rainbow Esp", getgenv().settings.espRainbow or false, function(bool)
+    getgenv().settings.espRainbow = bool
+    saveSettings()
 end)
 
 espSec:CreateToggle("Show Player Weapon", getgenv().settings.espWeapon or false, function(bool)
@@ -538,7 +694,7 @@ end)
 uiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
 	if key == "Escape" or key == "Backspace" then key = "NONE" end
 	
-    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key] end
+    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key]; writefile("/Rogue Hub/Configs/Keybind.ROGUEHUB", game:GetService("HttpService"):JSONEncode({Key = key})) end
 end)
 
 uiTog:SetState(true)
@@ -638,6 +794,15 @@ game:GetService("RunService").RenderStepped:Connect(function()
         colorFOV:UpdateColor(rainbow)    
     end
     
+    -- skid moment!?!?!?! -little
+    if getgenv().settings.espRainbow then
+        local hue = tick() % 10 / 10
+        local rainbow = Color3.fromHSV(hue, 1, 1)
+        
+        changeHighlightColors(rainbow)
+        colorESP:UpdateColor(rainbow)
+    end
+
     if localPlr.Character and localPlr.Status.Value ~= "Dead" and #game:GetService("Workspace").CurrentCamera:GetChildren() ~= 0 then
         if getgenv().settings.infJump and game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
             localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)

@@ -8,10 +8,16 @@ sound.SoundId = "rbxassetid://1548304764"
 sound.PlayOnRemove = true
 sound.Volume = 0.5
 
+local ourColor = Color3.fromRGB(153, 148, 148)
+
+function CheckConfigFile()
+    if not isfile("/Rogue Hub/Configs/Keybind.ROGUEHUB") then return Enum.KeyCode.RightControl else return Enum.KeyCode[game:GetService("HttpService"):JSONDecode(readfile("/Rogue Hub/Configs/Keybind.ROGUEHUB"))["Key"]] or Enum.KeyCode.RightControl end
+end
+
 local Config = {
     WindowName = "Rogue Hub | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
-    Color = Color3.fromRGB(201,144,150),
-    Keybind = Enum.KeyCode.RightControl
+    Color = ourColor,
+    Keybind = CheckConfigFile()
 }
 
 getgenv().settings = {
@@ -22,7 +28,6 @@ getgenv().settings = {
     upgradeFarm = false,
     coinFarm = false,
     bombLoop = false,
-    upgradeFarm = false,
     killAura = false,
     walkValue = 50,
     jumpValue = 50
@@ -39,6 +44,10 @@ if getgc then
             func = v
         elseif type(v) == "function" and not exploitFunction(v) and getinfo(v).name == "attack" then
             attackFunc = v
+        end
+
+        if func and attackFunc then
+            break
         end
     end
 end
@@ -252,7 +261,7 @@ end)
 uiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
 	if key == "Escape" or key == "Backspace" then key = "NONE" end
 	
-    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key] end
+    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key]; writefile("/Rogue Hub/Configs/Keybind.ROGUEHUB", game:GetService("HttpService"):JSONEncode({Key = key})) end
 end)
 
 uiTog:SetState(true)
@@ -378,17 +387,25 @@ game:GetService("RunService").RenderStepped:Connect(function()
         func()
     end
     
-    if getgenv().settings.upgradeFarm and task.wait(3) then
-        game:GetService("ReplicatedStorage").Remotes.Buy:FireServer("Weight " .. localPlr.Stats.UpgradesBought.Value, "Damage")
+    if getgenv().settings.upgradeFarm then
+        task.spawn(function()
+            task.wait(3)
+
+            game:GetService("ReplicatedStorage").Remotes.Buy:FireServer("Weight " .. localPlr.Stats.UpgradesBought.Value, "Damage")
+        end)
     end
     
-    if getgenv().settings.coinFarm and task.wait(5) then
-        for _, coin in next, game:GetService("Workspace").CoinStuff:GetDescendants() do
-            if coin.Name == "CoinCollectible" and coin:IsA("MeshPart") then
-                firetouchinterest(localPlr.Character:WaitForChild("HumanoidRootPart"), coin, 0)
-                firetouchinterest(localPlr.Character:WaitForChild("HumanoidRootPart"), coin, 1)
+    if getgenv().settings.coinFarm then
+        task.spawn(function()
+            task.wait(5)
+
+            for _, coin in next, game:GetService("Workspace").CoinStuff:GetDescendants() do
+                if coin.Name == "CoinCollectible" and coin:IsA("MeshPart") then
+                    firetouchinterest(localPlr.Character:WaitForChild("HumanoidRootPart"), coin, 0)
+                    firetouchinterest(localPlr.Character:WaitForChild("HumanoidRootPart"), coin, 1)
+                end
             end
-        end
+        end)
     end
 end)
 

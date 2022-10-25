@@ -1,3 +1,8 @@
+loadstring(game:HttpGet("https://api.irisapp.ca/Scripts/IrisInstanceProtect.lua"))()
+-- This loadstring lets me (little) use ProtectInstance(<instance>) (and UnProtectInstance) to make it so a game cant see that its actually there. (its in the genv btw)
+-- Docs for it: https://api.irisapp.ca/Scripts/docs/IrisProtectInstance/
+-- Yes I just ctrl-c, ctrl-v'd this from the no-scope script :)
+
 if getgenv().Rogue_AlreadyLoaded ~= nil then error("Rogue Hub was already found running or you have other scripts executed!") return else getgenv().Rogue_AlreadyLoaded = 0 end
 
 if game.PlaceId ~= 9648883891 then return end
@@ -9,10 +14,16 @@ sound.Volume = 0.5
 
 local localPlr = game:GetService("Players").LocalPlayer
 
+local ourColor = Color = Color3.fromRGB(153, 148, 148)
+
+function CheckConfigFile()
+    if not isfile("/Rogue Hub/Configs/Keybind.ROGUEHUB") then return Enum.KeyCode.RightControl else return Enum.KeyCode[game:GetService("HttpService"):JSONDecode(readfile("/Rogue Hub/Configs/Keybind.ROGUEHUB"))["Key"]] or Enum.KeyCode.RightControl end
+end
+
 local Config = {
     WindowName = "Rogue Hub | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
-    Color = Color3.fromRGB(153, 148, 148),
-    Keybind = Enum.KeyCode.RightControl
+    Color = ourColor,
+    Keybind = CheckConfigFile()
 }
 
 getgenv().settings = {
@@ -46,11 +57,24 @@ end
 
 local function espCreate(object, guiText, guiColor)
     local billboard = Instance.new("BillboardGui", object)
+    ProtectInstance(billboard)
+    billboard.Name = game:GetService("HttpService"):GenerateGUID(false)
     billboard.Adornee = object
     billboard.AlwaysOnTop = true
     billboard.Size = UDim2.new(0,6,0,6)
+
+    local high = Instance.new("Highlight", object)
+    ProtectInstance(high)
+    high.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    high.Adornee = object
+    high.Name = game:GetService("HttpService"):GenerateGUID(false)
+    high.FillColor = Color3.fromRGB(255,0,0)
+    high.OutlineColor = high.FillColor
+    high.FillTransparency = 0.4
     
     local text = Instance.new("TextLabel", billboard)
+    ProtectInstance(text)
+    text.Name = game:GetService("HttpService"):GenerateGUID(false)
     text.Text = guiText
     text.Font = "Ubuntu"
     text.TextStrokeTransparency = 0
@@ -62,11 +86,11 @@ local function espCreate(object, guiText, guiColor)
     
     game:GetService("RunService").RenderStepped:Connect(function()
         if text ~= nil then
-            local distance = math.floor((object.Position - localPlr.Character.HumanoidRootPart.Position).magnitude)
             text.TextSize = getgenv().settings.textSize or 16
             
             if getgenv().settings.showDistance then
-                text.Text = "ATM Machine | " .. distance .. " meters away"
+                local distance = math.floor((object.Position - localPlr.Character.HumanoidRootPart.Position).magnitude)
+                text.Text = "ATM Machine | " .. distance .. " studs away"
             else
                 text.Text = "ATM Machine"
             end
@@ -78,8 +102,9 @@ end
 
 local function espDelete(objectPath)
     for _,v in ipairs(objectPath:GetChildren()) do
-        if v:IsA("BillboardGui") then
-            v:Destroy()    
+        if v:IsA("BillboardGui") or v:IsA("Highlight") then
+            UnProtectInstance(v)
+            v:Destroy()
         end
     end
 end
@@ -224,7 +249,7 @@ end)
 uiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
 	if key == "Escape" or key == "Backspace" then key = "NONE" end
 	
-    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key] end
+    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key]; writefile("/Rogue Hub/Configs/Keybind.ROGUEHUB", game:GetService("HttpService"):JSONEncode({Key = key})) end
 end)
 
 uiTog:SetState(true)
