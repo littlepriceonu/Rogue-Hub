@@ -25,9 +25,7 @@ if getgc then
             table.insert(Guns, v)
         end
     end
-
-    print("#Guns:", #Guns)
-
+    
     function ModifyGuns(Mod, value)
         for i,v in ipairs(Guns) do
             v[Mod] = value
