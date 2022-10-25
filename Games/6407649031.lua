@@ -675,7 +675,7 @@ local uiTog = uiSec:CreateToggle("UI Toggle", nil, function(bool)
 	window:Toggle(bool)
 end)
 
-uuiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
+uiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
 	if key == "Escape" or key == "Backspace" then key = "NONE" end
 	
     if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key]; writefile("/Rogue Hub/Configs/Keybind.ROGUEHUB", game:GetService("HttpService"):JSONEncode({Key = key})) end
