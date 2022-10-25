@@ -10,7 +10,6 @@ if not req then
         Text = "Your exploit is unsupported with Rogue Hub!",
         Duration = 5
     })
-    
     return
 end
 
@@ -45,6 +44,7 @@ if response.Body ~= "404: Not Found" then
     end)
 
     -- If its not 404 why make another HTTP request?
+    -- ^ Answer to above - Kitzoon is big dumb
     loadstring(response.Body)()
 else
     game:GetService("StarterGui"):SetCore("SendNotification", {
@@ -52,6 +52,6 @@ else
         Text = "The game you are trying to play is not supported with Rogue Hub!",
         Duration = 5
     })
-    
+
     return
 end
