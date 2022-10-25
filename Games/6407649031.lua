@@ -1,9 +1,5 @@
 -- anticheat bypass, ty WhoIsE (staff manager at the krnl discord server) for this
 
-loadstring(game:HttpGet("https://api.irisapp.ca/Scripts/IrisInstanceProtect.lua"))()
--- This loadstring lets me (little) use ProtectInstance(<instance>) to make it so a game cant see that its actually there. (its in the genv btw)
--- Docs for it: https://api.irisapp.ca/Scripts/docs/IrisProtectInstance/
-
 if getconnections then
     for _, connection in pairs(getconnections(game:GetService("LogService").MessageOut)) do
         connection:Disable()
@@ -174,10 +170,9 @@ end)
 
 -- Adds a highlight to the charactter
 function highlightCharacter(Character)
+    if Character.Name == localPlr.Name then return end
+    
     local high = Instance.new("Highlight", game.Workspace)
-
-    -- Anti Cheat Devs cant see the highlight 😲
-    ProtectInstance(high)
 
     high.Name = Character.Name
     high.Adornee = Character
@@ -485,13 +480,7 @@ game:GetService("Players").PlayerAdded:Connect(function(player)
     end
 end)
 
-local colorESP = espSec:CreateColorpicker("ESP Color", function(color)
-	getgenv().settings.espColor = color
-    changeHighlightColors(color)
-	saveSettings()
-end)
-
-espSec:CreateToggle("Rainbow Esp", getgenv().settings.espRainbow or false, function(bool)
+espSec:CreateToggle("Rainbow ESP", getgenv().settings.espRainbow or false, function(bool)
     getgenv().settings.espRainbow = bool
     saveSettings()
 end)
@@ -504,6 +493,12 @@ end)
 espSec:CreateToggle("Show Player Distance", getgenv().settings.distanceESP or false, function(bool)
     getgenv().settings.distanceESP = bool
     saveSettings()
+end)
+
+local colorESP = espSec:CreateColorpicker("ESP Color", function(color)
+	getgenv().settings.espColor = color
+    changeHighlightColors(color)
+	saveSettings()
 end)
 
 local distanceSlider = espSec:CreateSlider("ESP Distance Limit", 0,1000,getgenv().settings.playerDistance or 0,true, function(value)
@@ -803,7 +798,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         colorESP:UpdateColor(rainbow)
     end
 
-    if localPlr.Character and localPlr.Status.Value ~= "Dead" and #game:GetService("Workspace").CurrentCamera:GetChildren() ~= 0 then
+    if localPlr.Character and #game:GetService("Workspace").CurrentCamera:GetChildren() ~= 0 then
         if getgenv().settings.infJump and game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
             localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end
