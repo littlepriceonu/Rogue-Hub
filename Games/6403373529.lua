@@ -89,19 +89,14 @@ sound.SoundId = "rbxassetid://1548304764"
 sound.PlayOnRemove = true
 sound.Volume = 0.5
 
-local ourColor = Color3.fromRGB(242, 125, 20)
-
-function CheckConfigFile()
-    if not isfile("/Rogue Hub/Configs/Keybind.ROGUEHUB") then return Enum.KeyCode.RightControl else return Enum.KeyCode[game:GetService("HttpService"):JSONDecode(readfile("/Rogue Hub/Configs/Keybind.ROGUEHUB"))["Key"]] or Enum.KeyCode.RightControl end end
-end
-
 local Config = {
     WindowName = "Spooky Hub | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name or "Slap Battles",
-    Color = ourColor,
-    Keybind = CheckConfigFile()
+    Color = Color3.fromRGB(242, 125, 20),
+    Keybind = Enum.KeyCode.RightControl
 }
 
 local localPlr = game:GetService("Players").LocalPlayer
+
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BracketV3.lua"))()
 local window = library:CreateWindow(Config, game:GetService("CoreGui"))
 local mainTab = window:CreateTab("Main")
@@ -170,7 +165,7 @@ local function getTool()
     local tool = localPlr.Character:FindFirstChildOfClass("Tool") or localPlr:WaitForChild("Backpack"):FindFirstChildOfClass("Tool")
     
     if tool ~= nil and tool:FindFirstChild("Glove") ~= nil then
-        return tool
+        return tool    
     end
 end
 
@@ -194,7 +189,7 @@ localPlr.CharacterAdded:Connect(function()
     if getgenv().settings.jumpPowerTog then
         humanoid.JumpPower = getgenv().settings.jumpPower or 50
     else
-        humanoid.JumpPower = 50
+        humanoid.JumpPower = 50    
     end
     
     if getgenv().settings.invis and localPlr.leaderstats.Slaps.Value >= 666 then
@@ -978,7 +973,7 @@ end)
 uiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
 	if key == "Escape" or key == "Backspace" then key = "NONE" end
 	
-    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key]; writefile("/Rogue Hub/Configs/Keybind.ROGUEHUB", game:GetService("HttpService"):JSONEncode({Key = key})) end
+    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key] end
 end)
 
 uiTog:SetState(true)
