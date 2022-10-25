@@ -381,7 +381,7 @@ visualSec:CreateToggle("Space Skybox", getgenv().settings.spaceSkybox or false, 
         space.SunTextureId = "rbxassetid://1084351190"
         space.StarCount = 500
         space.SunAngularSize = 12
-         space.MoonAngularSize = 1.5
+        space.MoonAngularSize = 1.5
     else
         if game:GetService("Lighting"):FindFirstChild("SpaceHD") == nil then return end
         
