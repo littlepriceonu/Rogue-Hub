@@ -96,7 +96,9 @@ getgenv().settings = {
     killSound = "Default",
     autoLock = false,
     textSize = 15,
-    fovColor = Color3.fromRGB(255,255,255)
+    fovColor = Color3.fromRGB(255,255,255),
+    espColor = Color3.new(1,0,0),
+    espRainbow = false
 }
 
 if makefolder and isfolder and not isfolder("Rogue Hub") then
@@ -121,6 +123,7 @@ function getQuote()
     return userQuotes[math.random(#userQuotes)]
 end
 
+-- Gets The Gun Model Of A Player. Player must be the character not the Player object
 local function getGun(player)
     if #game:GetService("Workspace").CurrentCamera:GetChildren() == 0 then return nil end
 
@@ -132,6 +135,121 @@ local function getGun(player)
 end
 
 -- NO MIKEY ALLOWED THAT RETARDS A FUCKING SKID (also if you see this then cool you found the second easter egg)
+
+-- Esp Stuff (I'm not gonna write an anti-anti cheat thing for this rn. If the devs do add something I'll just make it then)
+-- Things todo if they do add to to the anti-cheat: hook .OnDescendentAdded, __index, __newindex, :FindFirstChild, :GetChildren, :WaitForChild, GetDescendents. And probably put the highlights in a better spot than just the workspace
+
+local highlights = {}
+local currentEspColor = getgenv().settings.espColor or Color3.new(1,0,0)
+
+-- Check to see if the game's highlight exists again cause it overwrites ours.
+spawn(function()
+    while wait() do
+        for _, plr in ipairs(game.Players:GetChildren()) do
+            if not plr.Character then return end
+
+            local char = plr.Character
+            for _,v in ipairs(char:GetChildren()) do
+                if v.Name == "Highlight" then
+                    print("Has a Child Called Highlight.")
+                    v:Destroy()
+                    for _, h in ipairs(game.Workspace:GetChildren()) do
+                        if h.ClassName == "Highlight" and h.Name == char.Name then
+                            print("Found Our Highlight. Enabling and making Adornee character...")
+                            h.Adornee = char
+                            h.Enabled = getgenv().settings.playerESP or false
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+function highlightCharacter(Character)
+    local high = Instance.new("Highlight", game.Workspace)
+    high.Name = Character.Name
+    high.Adornee = Character
+    high.Enabled = getgenv().settings.playerESP or false
+    high.OutlineColor = currentEspColor or Color3.new(1, 0, 0)
+    high.FillColor = high.OutlineColor
+    high.FillTransparency = 0.3
+    high.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    high.OutlineTransparency = 0
+    table.insert(highlights, high)
+    return high
+end
+
+-- Player is the Player object, not the character, !If player is nil will toggle all highlights
+function highlightPlayer(player, toggle)
+    if (typeof(player) == "Instance" and player.ClassName == "Player") and (player.Character == nil) then return end
+    if toggle then
+        if player == nil then
+            for i,v in ipairs(highlights) do
+                v.Enabled = true
+            end
+        else
+            highlightCharacter(player.Character)
+        end
+    elseif player == nil then
+        for i,v in ipairs(highlights) do
+            v.Enabled = false
+        end
+    else
+        highlightCharacter(player.Character)
+    end
+end
+
+function changeHighlightColors(color)
+    currentEspColor = color
+
+    if #highlights == 0 then return end
+    for i,v in ipairs(highlights) do
+        v.OutlineColor = color
+        v.FillColor = v.OutlineColor
+    end
+end
+
+for i,player in ipairs(game.Players:GetChildren()) do
+    if not player or not player.Character then return end
+    print("Player Added Name:", player.Name)
+
+    highlightPlayer(player, getgenv().settings.playerESP or false)
+
+    print("Highlight Added")
+
+    player.CharacterAdded:Connect(function(character)
+        for i,v in ipairs(highlights) do
+            if v.Name == character.Name then
+                v.Adornee = character
+            end
+        end
+    end)
+
+    print("Character Added Check Done")
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+    print("Player Added Name:", player.Name)
+
+    repeat wait() until player.Character
+
+    highlightPlayer(player, getgenv().settings.playerESP or false)
+
+    print("Highlight Added")
+
+    player.CharacterAdded:Connect(function(character)
+        for i,v in ipairs(highlights) do
+            if v.Name == character.Name then
+                v.Adornee = character
+            end
+        end
+
+    end)
+
+    print("Character Added Check Done")
+end)
 
 local function esp(object, text, color)
     local espText = Drawing.new("Text")
@@ -247,7 +365,7 @@ visualSec:CreateToggle("Space Skybox", getgenv().settings.spaceSkybox or false, 
         space.SunTextureId = "rbxassetid://1084351190"
         space.StarCount = 500
         space.SunAngularSize = 12
-        space.MoonAngularSize = 1.5
+         space.MoonAngularSize = 1.5
     else
         if game:GetService("Lighting"):FindFirstChild("SpaceHD") == nil then return end
         
@@ -322,8 +440,11 @@ local espSec = mainTab:CreateSection("Player ESP")
 espSec:CreateToggle("Enabled", getgenv().settings.playerESP or false, function(bool)
     getgenv().settings.playerESP = bool
     saveSettings()
-    
+
     if getgenv().settings.playerESP and isLoaded then
+
+        highlightPlayer(nil, true)
+
         for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
             if player ~= localPlr and player.Character and getgenv().settings.playerESP then
                 esp(player.Character:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
@@ -333,6 +454,8 @@ espSec:CreateToggle("Enabled", getgenv().settings.playerESP or false, function(b
                 end)
             end
         end
+    elseif isLoaded then
+        highlightPlayer(nil, false)
     end
 end)
 
@@ -344,6 +467,17 @@ game:GetService("Players").PlayerAdded:Connect(function(player)
     	    esp(player.Character:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
         end)
     end
+end)
+
+local colorESP = espSec:CreateColorpicker("ESP Color", function(color)
+	getgenv().settings.espColor = color
+    changeHighlightColors(color)
+	saveSettings()
+end)
+
+espSec:CreateToggle("Rainbow Esp", getgenv().settings.espRainbow or false, function(bool)
+    getgenv().settings.espRainbow = bool
+    saveSettings()
 end)
 
 espSec:CreateToggle("Show Player Weapon", getgenv().settings.espWeapon or false, function(bool)
@@ -644,6 +778,15 @@ game:GetService("RunService").RenderStepped:Connect(function()
         colorFOV:UpdateColor(rainbow)    
     end
     
+    -- skid moment!?!?!?! -little
+    if getgenv().settings.espRainbow then
+        local hue = tick() % 10 / 10
+        local rainbow = Color3.fromHSV(hue, 1, 1)
+        
+        changeHighlightColors(rainbow)
+        colorESP:UpdateColor(rainbow)
+    end
+
     if localPlr.Character and localPlr.Status.Value ~= "Dead" and #game:GetService("Workspace").CurrentCamera:GetChildren() ~= 0 then
         if getgenv().settings.infJump and game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
             localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)

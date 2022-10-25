@@ -5,6 +5,9 @@ if game.PlaceId == 6403373529 or game.PlaceId == 9015014224 or game.PlaceId == 9
 local isLoaded = false
 local isTping = false
 
+local timeSlapped = 0
+local timeRagdolled = 0
+
 -- easter egg moment
 if syn then
     print("DohmBoy is cool!")
@@ -137,7 +140,8 @@ getgenv().settings = {
     invis = false,
     tpClick = false,
     walkSpeedKey = "NONE",
-    jumpPowerKey = "NONE"
+    jumpPowerKey = "NONE",
+    slappleFarm = false
 }
 
 if makefolder and isfolder and not isfolder("Rogue Hub") then
@@ -170,6 +174,14 @@ local function getTool()
     end
 end
 
+local function getBackpackTool()
+    local tool = localPlr:WaitForChild("Backpack"):FindFirstChildOfClass("Tool")
+    
+    if tool ~= nil and tool:FindFirstChild("Glove") ~= nil then
+        return tool
+    end
+end
+
 localPlr.CharacterAdded:Connect(function()
     local humanoid = localPlr.Character:WaitForChild("Humanoid")
     
@@ -186,11 +198,14 @@ localPlr.CharacterAdded:Connect(function()
     end
     
     if getgenv().settings.invis and localPlr.leaderstats.Slaps.Value >= 666 then
+        task.wait(0.5)
+        
         if localPlr.leaderstats.Glove.Value == "Ghost" then
             fireclickdetector(workspace.Lobby.Ghosthand.ClickDetector)
         end
         
         game:GetService("ReplicatedStorage").Ghostinvisibilityactivated:FireServer()
+        game:GetService("Lighting"):WaitForChild("dimensioncolor").Enabled = false
     end
     
     task.wait(3)
@@ -210,6 +225,12 @@ localPlr.CharacterAdded:Connect(function()
             end)
         end)
     end
+    
+    localPlr.Character.Ragdolled:GetPropertyChangedSignal("Value"):Connect(function()
+        if localPlr.Character.Ragdolled then
+            timeRagdolled = timeRagdolled + 1
+        end
+    end)
     
     if getgenv().settings.noReaper then
         localPlr.Character.ChildAdded:Connect(function(child)
@@ -250,23 +271,17 @@ if game.PlaceId ~= 9431156611 and game.PrivateServerId == "" then
     local corn = playerSec:CreateToggle("Candy Corns Farm", false, function(bool)
         getgenv().settings.candyFarm = bool
         
-        if getgenv().settings.candyFarm and isLoaded and localPlr.Character:FindFirstChild("entered") ~= nil then
-            localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
-            
-            repeat wait() until localPlr.Character ~= nil and localPlr.Character:WaitForChild("HumanoidRootPart") and localPlr.Character:FindFirstChild("entered") == nil
+        if setfpscap and getgenv().settings.candyFarm then
+            setfpscap(50)
+        elseif setfpscap and not getgenv().settings.candyFarm then
+            setfpscap(500)
         end
         
-        if getgenv().settings.candyFarm and workspace.dedBarrier.CanCollide then
-            workspace.dedBarrier.CanCollide = false
-        else
-            workspace.dedBarrier.CanCollide = true
-        end
-        
-        while isLoaded and getgenv().settings.candyFarm and not getgenv().slapFarm and not getgenv().settings.invis and localPlr.Character:FindFirstChild("entered") == nil and wait() do
+        while isLoaded and getgenv().settings.candyFarm and not getgenv().slapFarm and not getgenv().settings.invis and wait() do
             for _, corn in pairs(workspace.CandyCorns:GetChildren()) do
-                if corn:FindFirstChild("TouchInterest") ~= nil then
+                if getgenv().settings.candyFarm and corn:FindFirstChild("TouchInterest") ~= nil then
                     localPlr.Character.HumanoidRootPart.CFrame = corn.CFrame * CFrame.new(0,0,3)
-                    task.wait(0.2)
+                    task.wait(0.1)
                     localPlr.Character.HumanoidRootPart.CFrame = corn.CFrame
                     task.wait(0.2)
                 end
@@ -275,6 +290,13 @@ if game.PlaceId ~= 9431156611 and game.PrivateServerId == "" then
     end)
     
     corn:AddToolTip("Farm's candy corns for you. (from the latest halloween event)")
+    
+    local slapple = playerSec:CreateToggle("Slapples Glove Farm", getgenv().settings.slappleFarm or false, function(bool)
+        getgenv().settings.slappleFarm = bool
+        saveSettings()
+    end)
+    
+    slapple:AddToolTip("Auto farm's slapple gloves for you. (gets you free slaps)")
 end
 
 playerSec:CreateToggle("Autoclicker", getgenv().settings.autoClicker or false, function(bool)
@@ -293,7 +315,7 @@ localPlr:GetMouse().Button1Down:Connect(function()
         localPlr.Character.HumanoidRootPart.CFrame = localPlr:GetMouse().Hit + Vector3.new(0,7,0)
         
         isTping = true
-        wait(0.6)
+        wait(0.3)
         isTping = false
     end
 end)
@@ -305,7 +327,7 @@ if game.PlaceId ~= 9431156611 then
         
         if getgenv().settings.autoToxic then
             localPlr.leaderstats.Slaps:GetPropertyChangedSignal("Value"):Connect(function()
-                if not getgenv().settings.autoToxic then return end
+                if not getgenv().settings.autoToxic or getgenv().slapFarm then return end
                 
                 game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(getQuote(), "All")
             end)
@@ -313,6 +335,10 @@ if game.PlaceId ~= 9431156611 then
     end)
     
     toxicTog:AddToolTip("automatically says a toxic phrase when you slap someone")
+    
+    localPlr.leaderstats.Slaps:GetPropertyChangedSignal("Value"):Connect(function()
+        timeSlapped = timeSlapped + 1
+    end)
 end
 
 local noRagTog = playerSec:CreateToggle("Anti Ragdoll", getgenv().settings.noRagdoll or false, function(bool)
@@ -335,6 +361,14 @@ local noRagTog = playerSec:CreateToggle("Anti Ragdoll", getgenv().settings.noRag
         end)
     end
 end)
+
+if localPlr.Character:FindFirstChildOfClass("Humanoid") then
+    localPlr.Character.Ragdolled:GetPropertyChangedSignal("Value"):Connect(function()
+        if localPlr.Character.Ragdolled then
+            timeRagdolled = timeRagdolled + 1
+        end
+    end)
+end
 
 noRagTog:AddToolTip("looks clunky, but works good")
 
@@ -402,15 +436,20 @@ if game.PlaceId ~= 9431156611 then
     local togInvis = playerSec:CreateToggle("Invisible (FE)", false, function(bool)
         getgenv().settings.invis = bool
         
-        if not getgenv().settings.invis and localPlr.leaderstats.Slaps.Value >= 666 then
+        if not getgenv().settings.invis and isLoaded and localPlr.leaderstats.Slaps.Value >= 666 then
             game:GetService("ReplicatedStorage").Ghostinvisibilitydeactivated:FireServer()
+            
+            localPlr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+            
             return
         end
         
         if getgenv().settings.invis and isLoaded and localPlr.Character:FindFirstChild("entered") ~= nil then
-            localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+            localPlr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
             
             repeat wait() until localPlr.Character ~= nil and localPlr.Character:WaitForChild("HumanoidRootPart") and localPlr.Character:FindFirstChild("entered") == nil
+            
+            
         end
         
         if getgenv().settings.invis then
@@ -425,6 +464,7 @@ if game.PlaceId ~= 9431156611 then
                 return
             end
             
+            wait(0.3)
             game:GetService("ReplicatedStorage").Ghostinvisibilityactivated:FireServer()
             
             game:GetService("StarterGui"):SetCore("SendNotification", {
@@ -432,6 +472,8 @@ if game.PlaceId ~= 9431156611 then
                 Text = "You can now equip any other glove you want!",
                 Duration = 5
             })
+        
+            game:GetService("Lighting"):WaitForChild("dimensioncolor").Enabled = false
         end
     end)
     
@@ -440,14 +482,11 @@ if game.PlaceId ~= 9431156611 then
     playerSec:CreateToggle("Anti Void", getgenv().settings.noVoid or false, function(bool)
         getgenv().settings.noVoid = bool
         
-        workspace.dedBarrier.CanCollide = getgenv().settings.noVoid
-        workspace.arenaVoid.CanCollide = getgenv().settings.noVoid
+        workspace.dedBarrier.CanCollide = getgenv().settings.noVoid or false
+        workspace.arenaVoid.CanCollide = getgenv().settings.noVoid or false
         
         saveSettings()
     end)
-    
-    workspace.dedBarrier.CanCollide = getgenv().settings.noVoid or false
-    workspace.arenaVoid.CanCollide = getgenv().settings.noVoid or false
 end
 
 if game.PlaceId == 9431156611 then
@@ -558,6 +597,22 @@ playerSec:CreateSlider("Jump Power", 50,300,getgenv().settings.jumpPower or 50,t
 	end
 end)
 
+if game.PlaceId ~= 9431156611 then
+    local cubeGod = playerSec:CreateButton("Delete the Cube of Death", function()
+        if game:GetService("Workspace").Arena.CubeOfDeathArea:FindFirstChild("the cube of death(i heard it kills)") ~= nil then
+            game:GetService("Workspace").Arena.CubeOfDeathArea:FindFirstChild("the cube of death(i heard it kills)"):Destroy()
+        else
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Spooky Hub Error",
+                Text = "The cube of death is already deleted!",
+                Duration = 5
+            })
+        end
+    end)
+    
+    cubeGod:AddToolTip("Deletes the cube of death, practically making you invisible to it.")
+end
+
 if game.PlaceId == 9431156611 then
     local butPhase = playerSec:CreateButton("Phase", function()
         if localPlr.Character ~= nil and not localPlr.Character:FindFirstChild("inMatch").Value then
@@ -583,14 +638,33 @@ if game.PlaceId == 9431156611 then
         if localPlr.Character ~= nil and localPlr.Character:FindFirstChild("inMatch").Value then
             for _, v in pairs(workspace:GetChildren()) do
                 if v:IsA("Tool") and v.Handle:FindFirstChild("TouchInterest") ~= nil then
-                    firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Handle, 0)
-                    firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Handle, 1)
+                    firetouchinterest(localPlr.Character.HumanoidRootPart, v.Handle, 0)
+                    firetouchinterest(localPlr.Character.HumanoidRootPart, v.Handle, 1)
                 end
             end
         else
             game:GetService("StarterGui"):SetCore("SendNotification", {
                 Title = "Spooky Hub Error",
                 Text = "You aren't in the game yet! Or something else has happened.",
+                Duration = 5
+            })
+        end
+    end)
+    
+    playerSec:CreateButton("Use All Items", function()
+        if localPlr.Character ~= nil and localPlr.Character:FindFirstChild("inMatch").Value then
+            for _, v in pairs(localPlr.Backpack:GetChildren()) do
+                if v:IsA("Tool") and v.Handle:FindFirstChild("Glove") == nil and v.Name ~= "Bomb" and v.Name ~= "Witch Brew" then
+                    -- assume its an item
+                    
+                    localPlr.Character.Humanoid:EquipTool(v)
+                    v:Activate()
+                end
+            end
+        else
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Spooky Hub Error",
+                Text = "You aren't in the game yet! Or something else went wrong...",
                 Duration = 5
             })
         end
@@ -602,7 +676,7 @@ end
 local gloveSec = mainTab:CreateSection("Glove")
 local name = "Slap Farm"
 
-if game.PlaceId == 9431156611 then name = "Kill All (EXPERIMENTAL)" end
+if game.PlaceId == 9431156611 then name = "Kill All (PATCHED, DONT USE)" end
 
 local farmTog = gloveSec:CreateToggle(name, false, function(bool)
     getgenv().slapFarm = bool
@@ -614,42 +688,43 @@ local farmTog = gloveSec:CreateToggle(name, false, function(bool)
             end
         end
         
-        if getgenv().slapFarm and getgenv().settings.acidGod == false then
-            workspace.acidGod.CanCollide = true
-        elseif getgenv().slapFarm and getgenv().settings.lavaGod == false then
-            workspace.lavaGod.CanCollide = true
-        else
-            if getgenv().slapFarm == false then
-                if not getgenv().settings.acidGod then
-                    workspace.acidGod.CanCollide = false
-                end
-                
-                if not getgenv().settings.lavaGod then
-                    workspace.lavaGod.CanCollide = false
-                end
-            end
+        if getBackpackTool() and getgenv().slapFarm then
+            localPlr.Character.Humanoid:EquipTool(getBackpackTool())
+        end
+    else
+        if setfpscap and getgenv().slapFarm then
+            setfpscap(50)
+        elseif setfpscap and not getgenv().slapFarm then
+            setfpscap(500)
         end
     end
     
-    while task.wait() and getgenv().slapFarm do
+    while wait() and getgenv().slapFarm do
         if game.PlaceId ~= 9431156611 then
             for _, target in next, game:GetService("Players"):GetPlayers() do
-                if target ~= localPlr and target.Character ~= nil and target.Character:FindFirstChild("entered") ~= nil and localPlr.Character:FindFirstChild("entered") ~= nil and target.Character:FindFirstChild("rock") == nil and target.Character:FindFirstChild("Ragdolled").Value == false and target.Character:FindFirstChild("Reverse") == nil and target.Character:FindFirstChild("Right Arm") and target.Character:FindFirstChild("Error") == nil and target.Character:FindFirstChild("Orbit") == nil and target.Character:FindFirstChild("Spectator") == nil and target.Backpack:FindFirstChild("Spectator") == nil and getgenv().slapFarm then                        
-                    if getTool() ~= nil and getTool().Name == "Default" and getgenv().slapFarm then
-                        localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,15,0)
-                        wait(0.3)
-                        game:GetService("ReplicatedStorage").b:FireServer(target.Character["Right Arm"])
-                    elseif getTool() ~= nil and getTool().Name == "Bull" and getgenv().slapFarm then
-                        localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,15,0)
-                        wait(0.3)
-                        game:GetService("ReplicatedStorage").BullHit:FireServer(target.Character["Right Arm"])
-                    elseif getTool() ~= nil and getTool().Name ~= "Default" and getgenv().slapFarm then
-                        localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,3.5)
-                        wait(0.3)
-                        getTool():Activate()
-                    end
+                if target ~= localPlr and target.Character ~= nil and target.Character:FindFirstChild("entered") ~= nil and localPlr.Character:FindFirstChild("entered") ~= nil and target.Character:FindFirstChild("rock") == nil and target.Character:FindFirstChild("Ragdolled").Value == false and target.Character:FindFirstChild("Reversed") == nil and target.Character:FindFirstChild("Right Arm") and target.Character:FindFirstChild("Error") == nil and target.Character:FindFirstChild("Orbit") == nil and target.Character:FindFirstChild("Spectator") == nil and target.Backpack:FindFirstChild("Spectator") == nil and getgenv().slapFarm then                        
+                    pcall(function()
+                        if getTool() ~= nil and getTool().Name == "Default" and getgenv().slapFarm then
+                            localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,8,0)
+                            task.wait(0.25)
+                            game:GetService("ReplicatedStorage").b:FireServer(target.Character.HumanoidRootPart)
+                        elseif getTool() ~= nil and getTool().Name == "Bull" and getgenv().slapFarm then
+                            localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,8,0)
+                            task.wait(0.2)
+                            game:GetService("ReplicatedStorage").BullHit:FireServer(target.Character.HumanoidRootPart)
+                        elseif getTool() ~= nil and getTool().Name == "Ghost" and getgenv().slapFarm then
+                            localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,8,0)
+                            task.wait(0.2)
+                            game:GetService("ReplicatedStorage").GhostHit:FireServer(target.Character.HumanoidRootPart)
+                        elseif getTool() ~= nil and getTool().Name ~= "Default" and getgenv().slapFarm then
+                            repeat task.wait()
+                                localPlr.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,3.5)
+                                getTool():Activate()
+                            until target.Character == nil or localPlr.Character == nil or target.Character:FindFirstChild("Ragdolled").Value == true
+                        end
+                    end)
                     
-                    wait(0.3)
+                    task.wait(0.35)
                 end
             end
         else
@@ -672,6 +747,12 @@ local farmTog = gloveSec:CreateToggle(name, false, function(bool)
                                 end
                             end)
                             
+                            localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.StrafingNoPhysics)
+                            localPlr.Character.inMatch.Value = false
+                            
+                            game:GetService("TweenService"):Create(localPlr.Character.HumanoidRootPart, TweenInfo.new(1, Enum.EasingStyle.Cubic), { CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,6.3,0)}):Play()
+                            task.wait(1)
+                            
                             repeat task.wait()
                                 localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.StrafingNoPhysics)
                                 localPlr.Character.inMatch.Value = false
@@ -684,16 +765,10 @@ local farmTog = gloveSec:CreateToggle(name, false, function(bool)
                                     getTool():Activate()
                                 end
                             until target.Character:FindFirstChild("Dead") ~= nil and target.Character:FindFirstChild("Dead").Value or getgenv().slapFarm == false or gotAcid or gotLava
+                            
+                            localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+                            localPlr.Character.inMatch.Value = true
                         end)
-                        
-                        localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-                        localPlr.Character.inMatch.Value = true
-                        
-                        if gotAcid and getgenv().settings.acidGod == false and workspace.acidGod.CanCollide then
-                            workspace.acidGod.CanCollide = false
-                        elseif gotLava and getgenv().settings.lavaGod == false and workspace.lavaGod.CanCollide then
-                            workspace.lavaGod.CanCollide = false
-                        end
                     end
                 end
             end
@@ -720,13 +795,20 @@ local equip = gloveSec:CreateToggle("Auto Equip", getgenv().settings.autoEquip o
     getgenv().settings.autoEquip = bool
     saveSettings()
 end)
-    
+
 equip:AddToolTip("Automatically equips when you left click and your glove is not equipped.")
     
 localPlr:GetMouse().Button1Down:Connect(function()
-    if getgenv().settings.autoEquip and localPlr.Character:FindFirstChild("entered") ~= nil and localPlr:WaitForChild("Backpack"):FindFirstChildOfClass("Tool") ~= nil then
-        localPlr.Character.Humanoid:EquipTool(getTool())
-        getTool():Activate()
+    if game.PlaceId ~= 9431156611 then
+        if getgenv().settings.autoEquip and not getgenv().slapFarm and localPlr.Character:FindFirstChild("entered") ~= nil and getBackpackTool() ~= nil then
+            localPlr.Character.Humanoid:EquipTool(getBackpackTool())
+            getTool():Activate()
+        end
+    else
+        if getgenv().settings.autoEquip and not getgenv().slapFarm and localPlr.Character:FindFirstChild("inMatch").Value and getBackpackTool() ~= nil then
+            localPlr.Character.Humanoid:EquipTool(getBackpackTool())
+            getTool():Activate()
+        end
     end
 end)
 
@@ -913,6 +995,8 @@ local uiRainbow = uiSec:CreateToggle("Rainbow UI", nil, function(bool)
     end
 end)
 
+-- Credits
+
 local infoSec = infoTab:CreateSection("Credits")
 
 local req = http_request or request or syn.request
@@ -992,6 +1076,19 @@ infoSec:CreateButton("Join us on discord!", function()
     end
 end)
 
+-- Game Information
+
+local gameSec = infoTab:CreateSection("Game Information")
+
+local playtime = 0
+local playLabel = gameSec:CreateLabel("Playtime In Seconds: " .. playtime)
+
+if game.PlaceId ~= 9431156611 then
+    slapLabel = gameSec:CreateLabel("Players Slapped: " .. timeSlapped)
+end
+
+ragdollLabel = gameSec:CreateLabel("Times Ragdolled: " .. timeRagdolled)
+
 game:GetService("RunService").RenderStepped:Connect(function()
     if game.PlaceId ~= 9431156611 and localPlr ~= nil and getTool() ~= nil and localPlr.Character:FindFirstChild("entered") ~= nil or game.PlaceId == 9431156611 and localPlr ~= nil and getTool() ~= nil and localPlr.Character:FindFirstChild("inMatch").Value then
         if getgenv().settings.gloveExtend and getgenv().settings.extendOption == "Meat Stick" and getTool():FindFirstChild("Glove").Size ~= Vector3.new(0, 25, 2) then
@@ -1010,8 +1107,17 @@ game:GetService("RunService").RenderStepped:Connect(function()
             getTool().Glove.Transparency = 0
             getTool().Glove.Size = Vector3.new(2.5, 2.5, 1.7)
         end
+        
+        if getgenv().settings.slappleFarm and game.PlaceId ~= 9431156611 and game.PrivateServerId == "" then
+            for _,v in pairs(workspace.Arena:GetDescendants()) do
+                if getgenv().settings.slappleFarm and string.find(v.Name, "Slapple") and v:FindFirstChild("Glove") and v.Glove:FindFirstChildOfClass("TouchTransmitter") then
+                    firetouchinterest(localPlr.Character.HumanoidRootPart, v.Glove, 0)
+                    firetouchinterest(localPlr.Character.HumanoidRootPart, v.Glove, 1)
+                end
+            end
+        end
 
-        if getgenv().settings.autoClicker and not getgenv().slapFarm then
+        if task.wait(2) and getgenv().settings.autoClicker and not getgenv().slapFarm then
             getTool():Activate()
         end
         
@@ -1026,7 +1132,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         if getgenv().settings.auraSlap and getgenv().settings.auraOption == "Blatant" and not getgenv().slapFarm then
             if game.PlaceId ~= 9431156611 then
                 for _, target in next, game:GetService("Players"):GetPlayers() do
-                    if target.Character and target.Character:FindFirstChild("Humanoid") ~= nil and target.Character:FindFirstChild("rock") == nil and target.Character:FindFirstChild("Reverse") == nil and getgenv().settings.auraOption == "Blatant" and target:DistanceFromCharacter(localPlr.Character.HumanoidRootPart.Position) <= 20 and getTool().Name == "Default" then
+                    if target.Character and target.Character:FindFirstChild("Humanoid") ~= nil and target.Character:FindFirstChild("rock") == nil and target.Character:FindFirstChild("Reversed") == nil and getgenv().settings.auraOption == "Blatant" and target:DistanceFromCharacter(localPlr.Character.HumanoidRootPart.Position) <= 20 and getTool().Name == "Default" then
                         game:GetService("ReplicatedStorage").b:FireServer(target.Character.HumanoidRootPart)
                     end
                 end
@@ -1065,7 +1171,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             game:GetService("ReplicatedStorage").Fart:FireServer()
         end
         
-        if getgenv().settings.spin and localPlr:GetMouse().Icon ~= "rbxasset://textures/MouseLockedCursor.png" and not getgenv().slapFarm then
+        if getgenv().settings.spin and localPlr:GetMouse().Icon ~= "rbxasset://textures/MouseLockedCursor.png" and not getgenv().slapFarm and not getgenv().settings.candyFarm then
             localPlr.Character.HumanoidRootPart.CFrame = localPlr.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(getgenv().settings.spinSpeed), 0)
         end
     end
@@ -1139,12 +1245,23 @@ isLoaded = true
 task.wait(5)
 
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Please Note",
-    Text = "The spooky hub version you are using is currently in alpha, bugs may occur.",
+    Title = "Spooky Hub Fact",
+    Text = "Spooky hub has over 3500+ lines of code!",
     Duration = 10
 })
 
-while getTool() == nil and wait() do return end
+while wait(1) do
+    playtime = playtime + 1
+    playLabel:UpdateText("Playtime In Seconds: " .. playtime)
+    
+    if game.PlaceId ~= 9431156611 then
+        slapLabel:UpdateText("Players Slapped: " .. timeSlapped)
+    end
+    
+    ragdollLabel:UpdateText("Times Ragdolled: " .. timeRagdolled)
+end
+
+repeat wait() until getTool() ~= nil
 
 if getgenv().settings.auraSlap and getgenv().settings.auraOption == "Legit" then
     getTool().Glove.Touched:Connect(function(part)
