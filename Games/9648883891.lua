@@ -14,7 +14,7 @@ sound.Volume = 0.5
 
 local localPlr = game:GetService("Players").LocalPlayer
 
-local ourColor = Color = Color3.fromRGB(153, 148, 148)
+local ourColor = Color3.fromRGB(153, 148, 148)
 
 function CheckConfigFile()
     if not isfile("/Rogue Hub/Configs/Keybind.ROGUEHUB") then return Enum.KeyCode.RightControl else return Enum.KeyCode[game:GetService("HttpService"):JSONDecode(readfile("/Rogue Hub/Configs/Keybind.ROGUEHUB"))["Key"]] or Enum.KeyCode.RightControl end
