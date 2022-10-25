@@ -31,7 +31,7 @@ if not isfile("/Rogue Hub/Configs/Keybind.ROGUEHUB") then
     }))
 end
 
-local response = req({
+response = req({
     Url = "https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Games/" .. game.PlaceId .. ".lua",
     Method = "GET"
 })
