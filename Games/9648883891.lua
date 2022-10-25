@@ -1,3 +1,8 @@
+loadstring(game:HttpGet("https://api.irisapp.ca/Scripts/IrisInstanceProtect.lua"))()
+-- This loadstring lets me (little) use ProtectInstance(<instance>) (and UnProtectInstance) to make it so a game cant see that its actually there. (its in the genv btw)
+-- Docs for it: https://api.irisapp.ca/Scripts/docs/IrisProtectInstance/
+-- Yes I just ctrl-c, ctrl-v'd this from the no-scope script :)
+
 if getgenv().Rogue_AlreadyLoaded ~= nil then error("Rogue Hub was already found running or you have other scripts executed!") return else getgenv().Rogue_AlreadyLoaded = 0 end
 
 if game.PlaceId ~= 9648883891 then return end
@@ -52,12 +57,14 @@ end
 
 local function espCreate(object, guiText, guiColor)
     local billboard = Instance.new("BillboardGui", object)
+    ProtectInstance(billboard)
     billboard.Name = game:GetService("HttpService"):GenerateGUID(false)
     billboard.Adornee = object
     billboard.AlwaysOnTop = true
     billboard.Size = UDim2.new(0,6,0,6)
 
     local high = Instance.new("Highlight", object)
+    ProtectInstance(high)
     high.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     high.Adornee = object
     high.Name = game:GetService("HttpService"):GenerateGUID(false)
@@ -66,6 +73,7 @@ local function espCreate(object, guiText, guiColor)
     high.FillTransparency = 0.4
     
     local text = Instance.new("TextLabel", billboard)
+    ProtectInstance(text)
     text.Name = game:GetService("HttpService"):GenerateGUID(false)
     text.Text = guiText
     text.Font = "Ubuntu"
@@ -94,8 +102,9 @@ end
 
 local function espDelete(objectPath)
     for _,v in ipairs(objectPath:GetChildren()) do
-        if v:IsA("BillboardGui") then
-            v:Destroy()    
+        if v:IsA("BillboardGui") or v:IsA("Highlight") then
+            UnProtectInstance(v)
+            v:Destroy()
         end
     end
 end
