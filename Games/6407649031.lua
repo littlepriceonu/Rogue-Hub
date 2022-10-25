@@ -675,6 +675,8 @@ local uiTog = uiSec:CreateToggle("UI Toggle", nil, function(bool)
 	window:Toggle(bool)
 end)
 
+print(uiTog)
+
 uiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
 	if key == "Escape" or key == "Backspace" then key = "NONE" end
 	
