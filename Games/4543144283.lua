@@ -70,7 +70,7 @@ local function saveSettings()
 end
 
 local localPlr = game:GetService("Players").LocalPlayer
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BracketV3.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Bracket/main/BracketV3.lua"))()
 local Window = Library:CreateWindow(Config, game:GetService("CoreGui"))
 
 local mainTab = Window:CreateTab("Main")
