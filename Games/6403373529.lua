@@ -89,10 +89,14 @@ sound.SoundId = "rbxassetid://1548304764"
 sound.PlayOnRemove = true
 sound.Volume = 0.5
 
+function CheckConfigFile()
+    if not isfile("/Rogue Hub/Configs/Keybind.ROGUEHUB") then return Enum.KeyCode.RightControl else return Enum.KeyCode[game:GetService("HttpService"):JSONDecode(readfile("/Rogue Hub/Configs/Keybind.ROGUEHUB"))["Key"]] or Enum.KeyCode.RightControl end
+end
+
 local Config = {
     WindowName = "Spooky Hub | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name or "Slap Battles",
     Color = Color3.fromRGB(242, 125, 20),
-    Keybind = Enum.KeyCode.RightControl
+    Keybind = CheckConfigFile()
 }
 
 local localPlr = game:GetService("Players").LocalPlayer
@@ -200,7 +204,7 @@ localPlr.CharacterAdded:Connect(function()
         end
         
         game:GetService("ReplicatedStorage").Ghostinvisibilityactivated:FireServer()
-        game:GetService("Lighting"):WaitForChild("dimensioncolor").Enabled = false
+        game:GetService("Lighting"):WaitForChild("dimensioncolor"):Destroy()
     end
     
     task.wait(3)
@@ -249,7 +253,7 @@ localPlr.CharacterAdded:Connect(function()
     
     if getgenv().settings.auraSlap and getgenv().settings.auraOption == "Legit" then
         getTool().Glove.Touched:Connect(function(part)
-            if part.Parent:FindFirstChildOfClass("Humanoid") and getgenv().settings.auraSlap and getgenv().settings.auraOption == "Legit" then
+            if part.Parent:FindFirstChildOfClass("Humanoid") and getgenv().settings.auraSlap and getgenv().settings.auraOption == "Legit" and not getgenv().slapFarm then
                 getTool():Activate()
                 task.wait(0.3)
             end
@@ -468,7 +472,7 @@ if game.PlaceId ~= 9431156611 then
                 Duration = 5
             })
         
-            game:GetService("Lighting"):WaitForChild("dimensioncolor").Enabled = false
+            game:GetService("Lighting"):WaitForChild("dimensioncolor"):Destroy()
         end
     end)
     
@@ -778,12 +782,21 @@ if game.PlaceId == 9431156611 then toolName = "Kills all the players in your ser
 farmTog:AddToolTip(toolName)
 
 if game.PlaceId ~= 9431156611 then
-    local fartTog = gloveSec:CreateToggle("Fart Spam (FE)", getgenv().settings.spamFart or false, function(bool)
-        getgenv().settings.spamFart = bool
+    if keypress and keyrelease then
+        local fartTog = gloveSec:CreateToggle("Fart Spam (FE)", getgenv().settings.spamFart or false, function(bool)
+            getgenv().settings.spamFart = bool
+            saveSettings()
+        end)
+        
+        fartTog:AddToolTip("no explanation needed, only works for the default glove") 
+    end
+    
+    local rockTog = gloveSec:CreateToggle("Rock Spam (FE)", getgenv().settings.spamRock or false, function(bool)
+        getgenv().settings.spamRock = bool
         saveSettings()
     end)
     
-    fartTog:AddToolTip("no explanation needed, only works for the default glove") 
+    rockTog:AddToolTip("spams the rock ability on the glove, only works for diamond glove")
 end
 
 local equip = gloveSec:CreateToggle("Auto Equip", getgenv().settings.autoEquip or false, function(bool)
@@ -812,7 +825,7 @@ gloveSec:CreateToggle("Glove Extender", getgenv().settings.gloveExtend or false,
     saveSettings()
 end)
 
-local extendDrop = gloveSec:CreateDropdown("Extender Type", {"Meat Stick","Pancake", "Growth", "Slight Extend"}, function(option)
+local extendDrop = gloveSec:CreateDropdown("Extender Type", {"Meat Stick", "Pancake", "Growth", "North Korea Wall", "Slight Extend"}, function(option)
 	getgenv().settings.extendOption = option
 	saveSettings()
 end)
@@ -973,7 +986,7 @@ end)
 uiTog:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(key)
 	if key == "Escape" or key == "Backspace" then key = "NONE" end
 	
-    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key] end
+    if key == "NONE" then return else Config.Keybind = Enum.KeyCode[key]; writefile("/Rogue Hub/Configs/Keybind.ROGUEHUB", game:GetService("HttpService"):JSONEncode({Key = key})) end
 end)
 
 uiTog:SetState(true)
@@ -1095,6 +1108,9 @@ game:GetService("RunService").RenderStepped:Connect(function()
         elseif getgenv().settings.gloveExtend and getgenv().settings.extendOption == "Growth" and getTool():FindFirstChild("Glove").Size ~= Vector3.new(25, 25, 25) then
             getTool().Glove.Transparency = 0.5
             getTool().Glove.Size = Vector3.new(25, 25, 25)
+        elseif getgenv().settings.gloveExtend and getgenv().settings.extendOption == "North Korea Wall" and getTool():FindFirstChild("Glove").Size ~= Vector3.new(0, 3.5, 2) then
+            getTool().Glove.Transparency = 0.5
+            getTool().Glove.Size = Vector3.new(45, 0, 45)
         elseif getgenv().settings.gloveExtend and getgenv().settings.extendOption == "Slight Extend" and getTool():FindFirstChild("Glove").Size ~= Vector3.new(0, 3.5, 2) then
             getTool().Glove.Transparency = 0
             getTool().Glove.Size = Vector3.new(3, 3, 3.7)
@@ -1162,8 +1178,13 @@ game:GetService("RunService").RenderStepped:Connect(function()
             end 
         end
         
-        if getgenv().settings.spamFart and getTool().Name == "Default" then
-            game:GetService("ReplicatedStorage").Fart:FireServer()
+        if getgenv().settings.spamFart and keypress and keyrelease and getTool().Name == "Default" then
+            keypress(0x45)
+            keyrelease(0x45)
+        end
+        
+        if getgenv().settings.spamRock and getTool().Name == "Diamond" and not getgenv().slapFarm then
+            game:GetService("ReplicatedStorage").Rockmode:FireServer()
         end
         
         if getgenv().settings.spin and localPlr:GetMouse().Icon ~= "rbxasset://textures/MouseLockedCursor.png" and not getgenv().slapFarm and not getgenv().settings.candyFarm then
