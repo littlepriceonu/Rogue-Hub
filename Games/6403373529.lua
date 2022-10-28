@@ -270,19 +270,25 @@ if game.PlaceId ~= 9431156611 and game.PrivateServerId == "" then
     local corn = playerSec:CreateToggle("Candy Corns Farm", false, function(bool)
         getgenv().settings.candyFarm = bool
         
+        if isLoaded and not getgenv().settings.candyFarm and localPlr.Character ~= nil and localPlr.Character:FindFirstChild("Humanoid") ~= nil then
+            localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+        end
+        
         if setfpscap and getgenv().settings.candyFarm then
             setfpscap(50)
         elseif setfpscap and not getgenv().settings.candyFarm then
             setfpscap(500)
         end
         
-        while isLoaded and getgenv().settings.candyFarm and not getgenv().slapFarm and not getgenv().settings.invis and wait() do
+        while isLoaded and getgenv().settings.candyFarm and localPlr.Character ~= nil and localPlr.Character:FindFirstChild("HumanoidRootPart") ~= nil and not getgenv().slapFarm and not getgenv().settings.invis and wait() do
+            if #workspace.CandyCorns:GetChildren() == 0 then
+                localPlr.Character.HumanoidRootPart.CFrame = CFrame.new(-500.1678771972656, 8.789540767669678, 24.041479110717773)
+            end
+            
             for _, corn in pairs(workspace.CandyCorns:GetChildren()) do
                 if getgenv().settings.candyFarm and corn:FindFirstChild("TouchInterest") ~= nil then
-                    localPlr.Character.HumanoidRootPart.CFrame = corn.CFrame * CFrame.new(0,0,3)
-                    task.wait(0.1)
                     localPlr.Character.HumanoidRootPart.CFrame = corn.CFrame
-                    task.wait(0.2)
+                    task.wait(0.05)
                 end
             end
         end
@@ -680,6 +686,8 @@ if game.PlaceId == 9431156611 then name = "Kill All (PATCHED, DONT USE)" end
 local farmTog = gloveSec:CreateToggle(name, false, function(bool)
     getgenv().slapFarm = bool
     
+    local killCount = 0
+    
     if game.PlaceId == 9431156611 then
         for _,v in pairs(workspace:GetDescendants()) do
             if v:IsA("Seat") then
@@ -731,12 +739,12 @@ local farmTog = gloveSec:CreateToggle(name, false, function(bool)
             
             for _, target in next, game:GetService("Players"):GetPlayers() do
                 if target ~= localPlr and target.Character ~= nil and localPlr.Character ~= nil and target.Character:FindFirstChild("inMatch").Value and localPlr.Character:FindFirstChild("inMatch").Value and target.Character:FindFirstChild("Glider") == nil and localPlr.Character:FindFirstChild("Glider") == nil and target.Character:FindFirstChild("HumanoidRootPart") and localPlr.Character:FindFirstChild("HumanoidRootPart") and target.Character:FindFirstChild("Dead") == nil and target.Character.Ragdolled.Value == false and localPlr.Character.Ragdolled.Value == false and getgenv().slapFarm then
-                    if workspace:FindFirstChild("BusModel") ~= nil and workspace:FindFirstChild("BusModel").Welds:FindFirstChild(localPlr.Name) ~= nil or workspace:FindFirstChild("BusModel") ~= nil and workspace:FindFirstChild("BusModel").Welds:FindFirstChild(target.Name) ~= nil then return end
+                    --if workspace:FindFirstChild("BusModel") ~= nil and workspace:FindFirstChild("BusModel").Welds:FindFirstChild(localPlr.Name) ~= nil or workspace:FindFirstChild("BusModel") ~= nil and workspace:FindFirstChild("BusModel").Welds:FindFirstChild(target.Name) ~= nil then return end
                     
                     local gotAcid = false
                     local gotLava = false
                     
-                    if getTool() ~= nil and getgenv().slapFarm then
+                    if getTool() ~= nil and getgenv().slapFarm and killCount ~= 2 then
                         pcall(function()
                             localPlr.Character.HumanoidRootPart.Touched:Connect(function(part)
                                 if part.Name == "acidGod" and gotAcid == false then
@@ -746,11 +754,11 @@ local farmTog = gloveSec:CreateToggle(name, false, function(bool)
                                 end
                             end)
                             
-                            localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.StrafingNoPhysics)
-                            localPlr.Character.inMatch.Value = false
+                            -- localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.StrafingNoPhysics)
+                            -- localPlr.Character.inMatch.Value = false
                             
-                            game:GetService("TweenService"):Create(localPlr.Character.HumanoidRootPart, TweenInfo.new(1, Enum.EasingStyle.Cubic), { CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,6.3,0)}):Play()
-                            task.wait(1)
+                            -- game:GetService("TweenService"):Create(localPlr.Character.HumanoidRootPart, TweenInfo.new(1, Enum.EasingStyle.Bounce), { CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,6.3,0)}):Play()
+                            -- task.wait(1)
                             
                             repeat task.wait()
                                 localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.StrafingNoPhysics)
@@ -765,8 +773,18 @@ local farmTog = gloveSec:CreateToggle(name, false, function(bool)
                                 end
                             until target.Character:FindFirstChild("Dead") ~= nil and target.Character:FindFirstChild("Dead").Value or getgenv().slapFarm == false or gotAcid or gotLava
                             
+                            killCount = killCount + 1
+                            print(killCount)
+                            
                             localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
                             localPlr.Character.inMatch.Value = true
+                            
+                            if killCount == 2 then
+                                print("kills are over 2")
+                                task.wait(10)
+                                killCount = 0
+                                print("kill count is now " .. killCount)
+                            end
                         end)
                     end
                 end
@@ -869,7 +887,7 @@ auraSec:CreateToggle("Enabled", getgenv().settings.auraSlap or false, function(b
 
     if getgenv().settings.auraSlap and getgenv().settings.auraOption == "Legit" then
         getTool().Glove.Touched:Connect(function(part)
-            if part.Parent:FindFirstChildOfClass("Humanoid") and getgenv().settings.auraSlap and getgenv().settings.auraOption == "Legit" and not getgenv().slapFarm then
+            if part.Parent:FindFirstChildOfClass("Humanoid") and getgenv().settings.auraSlap and getgenv().settings.auraOption == "Legit" and part.Parent:FindFirstChild("Reversed") == nil and not getgenv().slapFarm then
                 getTool():Activate()
                 task.wait(0.3)
             end
